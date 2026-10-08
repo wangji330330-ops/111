@@ -1695,23 +1695,47 @@ function switchTab(name) {
   if (name === 'scores') renderScores();
   if (name === 'random') renderRandomHerb();
   if (name === 'guess') { renderGuess(); sprinkleMotto(); }
-  /* 支持链接直达：#browse / #random / #exam / #guess / #wrong / #scores */
+  /* 支持链接直达：#browse / #random / #exam / #guess / #wrong / #scores
+     也支持 #browse/麻黄 定位到某味药（切换药时不覆盖带药名的 hash） */
   try {
-    if (('#' + name) !== location.hash) history.replaceState(null, '', '#' + name);
+    const cur = (location.hash || '').replace('#', '');
+    const mine = (tab === 'browse') ? (browseName ? 'browse/' + encodeURIComponent(browseName) : 'browse') : name;
+    if (cur !== mine && !(cur.startsWith('browse/') && tab === 'browse')) {
+      history.replaceState(null, '', '#' + mine);
+    }
   } catch (e) { }
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-/* 从 URL hash 恢复标签页 */
+/* 从 URL hash 恢复标签页；支持 #browse/麻黄 直达某味药 */
 function tabFromHash() {
-  const h = (location.hash || '').replace('#', '');
-  return ['browse', 'random', 'exam', 'guess', 'wrong', 'scores'].includes(h) ? h : 'browse';
+  const raw = (location.hash || '').replace('#', '');
+  const [tab, arg] = raw.split('/');
+  const ok = ['browse', 'random', 'exam', 'guess', 'wrong', 'scores'];
+  return { tab: ok.includes(tab) ? tab : 'browse', arg: arg ? decodeURIComponent(arg) : '' };
+}
+
+/* 应用 hash：切换标签页，若带药名则定位到该药 */
+function applyHash() {
+  const { tab, arg } = tabFromHash();
+  switchTab(tab);
+  if (tab === 'browse' && arg) {
+    const h = herbByName(arg);
+    if (h) {
+      const s = $('#search');
+      if (s) s.value = arg;
+      browseCat = '';
+      renderHerbList();
+      showHerb(arg);
+    }
+  }
 }
 
 /* ------------------------------------------------------------------ */
 /* 速查                                                                */
 /* ------------------------------------------------------------------ */
 let browseCat = '';
+let browseName = '';   /* 当前查看的药名（用于 #browse/药名 直达与分享） */
 
 function renderCategoryChips() {
   const box = $('#catChips');
@@ -1762,6 +1786,7 @@ function renderHerbList() {
 function showHerb(name) {
   const h = herbByName(name);
   if (!h) return;
+  browseName = name;
   $$('#herbList .row').forEach(r => r.classList.toggle('active', r.dataset.name === name));
   const wrong = LS.get('wrong', {});
   $('#detail').innerHTML = `
@@ -2367,9 +2392,9 @@ async function boot() {
     try { renderRandomHerb(); } catch (e) { }
     try { sprinkleMotto(); bindGuessKeys(); } catch (e) { }
     try {
-      const t0 = tabFromHash();
-      if (t0 !== 'browse') switchTab(t0);
-      window.addEventListener('hashchange', () => switchTab(tabFromHash()));
+      const { tab: t0, arg: a0 } = tabFromHash();
+      if (t0 !== 'browse' || a0) applyHash();
+      window.addEventListener('hashchange', applyHash);
     } catch (e) { }
     if (location.protocol !== 'file:') checkUpdate(false);
   } catch (e) {
