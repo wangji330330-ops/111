@@ -438,7 +438,18 @@ function switchTab(name) {
   $$('.page').forEach(p => p.classList.toggle('active', p.id === 'page-' + name));
   if (name === 'wrong') renderWrong();
   if (name === 'scores') renderScores();
-  window.scrollTo({ top: 0 });
+  if (name === 'random') renderRandomHerb();
+  /* 支持链接直达：#browse / #random / #exam / #wrong / #scores */
+  try {
+    if (('#' + name) !== location.hash) history.replaceState(null, '', '#' + name);
+  } catch (e) { }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* 从 URL hash 恢复标签页 */
+function tabFromHash() {
+  const h = (location.hash || '').replace('#', '');
+  return ['browse', 'random', 'exam', 'wrong', 'scores'].includes(h) ? h : 'browse';
 }
 
 /* ------------------------------------------------------------------ */
@@ -1013,6 +1024,13 @@ async function boot() {
       sub.textContent = `题库 ${APP.herbs.length} 味 · ${APP.categories.length} 个分类 · 图片 ` +
         Object.values(APP.imgMap).reduce((s, a) => s + a.length, 0) + ' 张';
     }
+    try { startClock(); } catch (e) { }
+    try { renderRandomHerb(); } catch (e) { }
+    try {
+      const t0 = tabFromHash();
+      if (t0 !== 'browse') switchTab(t0);
+      window.addEventListener('hashchange', () => switchTab(tabFromHash()));
+    } catch (e) { }
     if (location.protocol !== 'file:') checkUpdate(false);
   } catch (e) {
     $('#loading').innerHTML = '<div class="empty">数据加载失败：' + esc(e.message) +

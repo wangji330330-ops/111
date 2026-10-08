@@ -24,7 +24,10 @@ DATA = os.path.join(WEB, "data")
 IMGSRC = os.path.join(HERE, "images")
 IMGDST = os.path.join(WEB, "images")
 
-VERSION = "1.1.0"
+VERSION = "1.2.0"
+
+NOTES = ("新增：北京时间+天干地支/十二时辰/脏腑当令养生建议、随手一味随机中药（带换一味按钮）；"
+         "界面过渡与阴影优化更丝滑；修正 42 味中药图片")
 MAX_SIDE = 420
 QUALITY = 70
 
@@ -116,11 +119,11 @@ def main():
         "name": "中药学复习系统（网页版）",
         "version": VERSION,
         "buildDate": __import__("time").strftime("%Y-%m-%d"),
-        "notes": "网页版首发：中药速查（含实物图片）、100 分制限时测试、错题本、成绩记录",
-        "files": ["index.html", "app.js", "style.css",
+        "notes": NOTES,
+        "files": ["index.html", "app.js", "timeherb.js", "style.css", "style2.css",
                   "data/herbs.json", "data/synonyms.json", "data/images_manifest.json"],
         "updateUrl": "version.json",
-        "homepage": "（部署后填写你的网址）",
+        "homepage": "https://wangji330330-ops.github.io/111/",
         "license": "MIT",
     }, indent=1)
 

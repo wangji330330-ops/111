@@ -7,6 +7,7 @@
 <meta name="description" content="中药学复习系统网页版：中药速查（含实物图片）、100 分制限时测试、错题本、成绩记录。开源、纯静态、手机可用。">
 <meta name="theme-color" content="#1f6f54">
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style2.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='48' fill='%231f6f54'/><text x='50' y='68' font-size='58' text-anchor='middle' fill='white' font-family='SimHei'>药</text></svg>">
 </head>
 <body>
@@ -25,11 +26,15 @@
   </div>
   <nav class="tabs">
     <button class="tab active" data-tab="browse">中药速查</button>
+    <button class="tab" data-tab="random">随机中药</button>
     <button class="tab" data-tab="exam">开始测试</button>
     <button class="tab" data-tab="wrong">错题本</button>
     <button class="tab" data-tab="scores">成绩记录</button>
   </nav>
 </header>
+
+<!-- 北京时间 / 干支 · 时辰 · 脏腑当令 / 养生建议 -->
+<section id="clockBox" class="clockbox"></section>
 
 <div id="updateBar" class="hide"></div>
 <div id="loading">正在加载题库与图片索引…</div>
@@ -52,6 +57,17 @@
         <div id="detail"></div>
         <div class="imgbox" id="imgBox"></div>
       </div>
+    </div>
+  </section>
+
+  <!-- ========== 随机中药 ========== -->
+  <section class="page" id="page-random">
+    <div class="card rand-wrap">
+      <div class="rand-head">
+        <h3>随手一味 · 随机中药</h3>
+        <span class="sub">点「换一味」随机抽一味中药，随时复习药性功效</span>
+      </div>
+      <div id="randBox"></div>
     </div>
   </section>
 
@@ -205,6 +221,7 @@
   数据保存在你的浏览器本地（localStorage），不联网上传
 </footer>
 
+<script src="timeherb.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
