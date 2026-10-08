@@ -2,7 +2,7 @@
 
 中药药性 / 功效 / 归经 / 用法 / 注意的**限时 100 分制测试**与**图文速查**。开源、免费、可离线。
 
-- **网页版**（推荐，手机也能用）：[`web/index.html`](web/index.html)
+- **网页版**（推荐，手机也能用）：[`docs/index.html`](docs/index.html)
 - **桌面版**：`发布\中药学复习系统.exe`（Windows 单文件，双击即用，无需安装）
 - **题库**：294 味中药 · 43 个分类 · 821 条功效 · 573 张实物图片
 - **许可**：[MIT](LICENSE)（可自由使用、修改、再发布）
@@ -11,7 +11,7 @@
 
 ## 一、网页版（免费部署）
 
-网页版是**纯静态**单页应用：把 `web/` 目录整个上传到任意免费静态托管即可，**不需要服务器、不需要数据库、不需要花钱**。
+网页版是**纯静态**单页应用：把 `docs/` 目录整个上传到任意免费静态托管即可，**不需要服务器、不需要数据库、不需要花钱**。
 
 > 详细的图文步骤见 **[网页版部署指南.md](网页版部署指南.md)**（含 GitHub Pages / Cloudflare Pages / Netlify 三种免费方案与更新方法）。
 
@@ -19,7 +19,7 @@
 
 ```bash
 # 1) 在 GitHub 网页上新建仓库，例如 tcm-review
-# 2) 本地初始化并推送（把 web/ 作为站点根目录）
+# 2) 本地初始化并推送（把 docs/ 作为站点根目录）
 git init
 git add .
 git commit -m "中药学复习系统：题库、桌面版与网页版"
@@ -37,7 +37,7 @@ git push -u origin main
 ### 方式 B：Cloudflare Pages（也免费，国内访问通常更快）
 
 1. 登录 Cloudflare → **Workers & Pages → Create → Pages → Connect to Git**
-2. 选你的仓库；**Build output directory** 填 `web`，Build command 留空
+2. 选你的仓库；**Build output directory** 填 `docs`，Build command 留空
 3. 部署完成后得到 `https://<项目名>.pages.dev`
 
 ### 方式 C：本地先看看（不联网也能用）
@@ -45,7 +45,7 @@ git push -u origin main
 在项目根目录执行（任选其一）：
 
 ```bash
-python -m http.server 8080 --directory web      # Python
+python -m http.server 8080 --directory docs      # Python
 npx serve web                                   # Node
 ```
 
@@ -54,7 +54,7 @@ npx serve web                                   # Node
 
 ### 更新地址（免费自动更新）
 
-网页版启动时会读取同目录下的 [`web/version.json`](web/version.json)：
+网页版启动时会读取同目录下的 [`docs/version.json`](docs/version.json)：
 
 ```json
 {
@@ -105,7 +105,7 @@ powershell -ExecutionPolicy Bypass -File build.ps1
 ## 四、目录结构
 
 ```
-├─ web/                    网页版（部署这个目录）
+├─ docs/                    网页版（部署这个目录）
 │   ├─ index.html          单页应用
 │   ├─ app.js              出题引擎 + 界面逻辑
 │   ├─ style.css

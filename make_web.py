@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
-"""生成网页版数据：web/data/*.json + 图片目录 + 版本信息。
+"""生成网页版数据：docs/data/*.json + 图片目录 + 版本信息。
 
 输出：
-  web/index.html                单页应用（另写）
-  web/data/herbs.json           题库（含功效/性味/用法等）
-  web/data/chunk_XX.json        分块题库（便于增量加载，默认用 herbs.json）
-  web/data/synonyms.json        同义词表（填空判分容错）
-  web/data/images_manifest.json 药名 -> 图片文件名
-  web/images/*.jpg              图片（从 images/ 复制，压缩到 420px）
-  web/version.json              版本与更新信息
+  docs/index.html                单页应用（另写）
+  docs/data/herbs.json           题库（含功效/性味/用法等）
+  docs/data/chunk_XX.json        分块题库（便于增量加载，默认用 herbs.json）
+  docs/data/synonyms.json        同义词表（填空判分容错）
+  docs/data/images_manifest.json 药名 -> 图片文件名
+  docs/images/*.jpg              图片（从 images/ 复制，压缩到 420px）
+  docs/version.json              版本与更新信息
 """
 import io
 import json
@@ -19,7 +19,7 @@ import struct
 from PIL import Image
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-WEB = os.path.join(HERE, "web")
+WEB = os.path.join(HERE, "docs")
 DATA = os.path.join(WEB, "data")
 IMGSRC = os.path.join(HERE, "images")
 IMGDST = os.path.join(WEB, "images")
@@ -45,7 +45,7 @@ def save_json(path, obj, indent=None):
 
 
 def pack_images(manifest):
-    """复制并压缩图片到 web/images，返回 药名_序号 -> 文件名 映射"""
+    """复制并压缩图片到 docs/images，返回 药名_序号 -> 文件名 映射"""
     ensure(IMGDST)
     count = 0
     total = 0
@@ -124,7 +124,7 @@ def main():
         "license": "MIT",
     }, indent=1)
 
-    print("herbs=%d images=%d (%.1f MB) -> web/" % (len(out_herbs), n_img, size_img / 1048576.0))
+    print("herbs=%d images=%d (%.1f MB) -> docs/" % (len(out_herbs), n_img, size_img / 1048576.0))
     print("version=%s" % VERSION)
 
 

@@ -24,7 +24,7 @@ if "%PY%"=="" (
 
 if "%PY%"=="" (
   echo [!] 没有找到 Python。
-  echo     请改用「web\离线版.html」直接双击打开，功能完全一样。
+  echo     请改用「docs\离线版.html」直接双击打开，功能完全一样。
   echo.
   pause
   exit /b 1
@@ -37,5 +37,5 @@ echo （关闭本窗口即停止服务器）
 echo.
 
 start "" http://127.0.0.1:8080/
-"%PY%" -m http.server 8080 --directory web
+"%PY%" -m http.server 8080 --directory docs
 pause

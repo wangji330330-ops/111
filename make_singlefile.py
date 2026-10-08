@@ -3,8 +3,8 @@
 
 输出：发布\中药学复习系统（离线版）.html
   - 题库 / 同义词 / 图片索引全部内嵌到 HTML 里
-  - 图片仍从 web/images/ 相对读取；若不存在，则改为读取 exe 同级 images/ 或联网地址
-  - 直接把该文件放到 web/ 目录里即可（图片路径相对 web/images/）
+  - 图片仍从 docs/images/ 相对读取；若不存在，则改为读取 exe 同级 images/ 或联网地址
+  - 直接把该文件放到 docs/ 目录里即可（图片路径相对 docs/images/）
 """
 import io
 import json
@@ -13,7 +13,7 @@ import re
 import shutil
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-WEB = os.path.join(HERE, "web")
+WEB = os.path.join(HERE, "docs")
 OUT_DIR = os.path.join(HERE, "发布")
 
 
@@ -49,7 +49,7 @@ def main():
     html = html.replace('<script src="app.js"></script>',
                         payload + "<script>\n" + js + "\n</script>")
 
-    # 离线版会放在 发布/ 下，图片目录在 web/images/，改写成相对可用的候选路径
+    # 离线版会放在 发布/ 下，图片目录在 docs/images/，改写成相对可用的候选路径
     html = html.replace('src="images/', 'src="images/')
 
     if not os.path.isdir(OUT_DIR):
@@ -60,7 +60,7 @@ def main():
 
     size = os.path.getsize(out)
     print("单文件离线版: %s  (%.1f MB)" % (out, size / 1048576.0))
-    print("提示：把它复制到 web/ 目录下双击使用，图片即可正常显示。")
+    print("提示：把它复制到 docs/ 目录下双击使用，图片即可正常显示。")
 
 
 if __name__ == "__main__":
