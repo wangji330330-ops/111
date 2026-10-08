@@ -1,0 +1,23 @@
+# ---- 构建产物 / 临时文件（不需要进仓库） ----
+发布/TcmReview.exe
+发布/中药学复习系统.exe
+res/images.res
+res/app.res
+selftest.txt
+debug.log
+fetch_log.txt
+__pycache__/
+*.pyc
+rules*.py
+patch_*.py
+*.tmp
+*.lnk
+
+# ---- 原始图片库（19 MB，仅根目录那份；网页版用的 web/images 必须保留） ----
+/images/
+
+# ---- 编辑器/系统文件 ----
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
