@@ -477,11 +477,17 @@ function filteredHerbs() {
 function renderHerbList() {
   const list = filteredHerbs();
   $('#herbCount').textContent = `共 ${list.length} 味（题库 ${APP.herbs.length} 味）`;
-  $('#herbList').innerHTML = list.map(h =>
+  const box = $('#herbList');
+  box.innerHTML = list.map(h =>
     `<div class="row" data-name="${esc(h.n)}">
        <span class="row-name">${esc(h.n)}</span>
        <span class="row-cat">${esc(h.c.split('·')[0])}</span>
      </div>`).join('') || '<div class="empty">没有匹配的药物</div>';
+  // 点击（含触摸）选中药物 —— 修复：之前速查列表漏绑事件，点不动
+  box.onclick = e => {
+    const row = e.target.closest('.row');
+    if (row && row.dataset.name) showHerb(row.dataset.name);
+  };
   if (list.length) showHerb(list[0].n);
   else $('#detail').innerHTML = '';
 }
