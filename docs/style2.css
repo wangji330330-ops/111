@@ -117,7 +117,13 @@ body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; 
               transform .16s cubic-bezier(.22, .61, .36, 1), box-shadow .2s ease, opacity .2s ease;
 }
 .btn:active, .chip:active, .navbtn:active, .herb-chip:active { transform: scale(.97); }
-.tab:hover { color: #fff; }
+/* 分类标签：hover 只加浅绿底、字色保持深色，避免“白字变隐形” */
+.chip:hover { background: var(--brand-light); border-color: #bfdccd; }
+.chip.active:hover { background: var(--brand); color: #fff; }
+/* 注意：不要给 .tab:hover 改字色 —— 深绿顶栏上的浅绿字一旦变纯白，
+   落在浅色底上就会“隐身”。这里只在 hover 时加一点底，保持原字色。 */
+.tab:hover { background: rgba(255, 255, 255, .18); }
+.tab.active:hover { color: var(--brand); }
 .card { transition: box-shadow .25s ease, transform .25s ease; }
 .card:hover { box-shadow: 0 4px 22px rgba(20, 40, 32, .08); }
 .page { animation: pageIn .26s cubic-bezier(.22, .61, .36, 1); }
