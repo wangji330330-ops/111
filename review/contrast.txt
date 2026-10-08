@@ -1,0 +1,6 @@
+CASE                                       RATIO
+NEW active: white bg + #1f6f54 text         6.07  PASS-AA
+OLD active: #f6f7f9 bg + #1f6f54 text       5.66  PASS-AA
+BAD: #f6f7f9 bg + #d8ece4 text              1.15  FAIL
+normal: #1f6f54 bg + #d8ece4 text           4.92  PASS-AA
+hover: ~#3a8468 bg + #d8ece4 text           3.64  WEAK
