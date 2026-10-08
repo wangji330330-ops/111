@@ -439,7 +439,8 @@ function switchTab(name) {
   if (name === 'wrong') renderWrong();
   if (name === 'scores') renderScores();
   if (name === 'random') renderRandomHerb();
-  /* 支持链接直达：#browse / #random / #exam / #wrong / #scores */
+  if (name === 'guess') { renderGuess(); sprinkleMotto(); }
+  /* 支持链接直达：#browse / #random / #exam / #guess / #wrong / #scores */
   try {
     if (('#' + name) !== location.hash) history.replaceState(null, '', '#' + name);
   } catch (e) { }
@@ -449,7 +450,7 @@ function switchTab(name) {
 /* 从 URL hash 恢复标签页 */
 function tabFromHash() {
   const h = (location.hash || '').replace('#', '');
-  return ['browse', 'random', 'exam', 'wrong', 'scores'].includes(h) ? h : 'browse';
+  return ['browse', 'random', 'exam', 'guess', 'wrong', 'scores'].includes(h) ? h : 'browse';
 }
 
 /* ------------------------------------------------------------------ */
@@ -527,12 +528,18 @@ function renderImages(name) {
   const files = APP.imgMap[name] || [];
   const hidden = LS.get('hidden', []);
   const shown = files.filter(f => !hidden.includes(name + '|' + f));
-  if (!shown.length) { box.innerHTML = ''; return; }
+  if (!shown.length) {
+    box.innerHTML = files.length
+      ? `<div class="img-all-hidden">这一味的图都被隐藏了（可在下方恢复）</div>` : '';
+    renderHiddenBox(name);
+    return;
+  }
   box.innerHTML = shown.map((f, i) =>
     `<figure class="ph" data-name="${esc(name)}" data-file="${esc(f)}">
        <img src="images/${encodeURIComponent(f)}" alt="${esc(name)}" loading="lazy">
        <figcaption>图 ${i + 1}/${shown.length} · 点击放大</figcaption>
      </figure>`).join('');
+  renderHiddenBox(name);
 }
 
 /* 图片查看器 */
@@ -553,6 +560,17 @@ function drawViewer() {
   $('#viewerCap').textContent = `${name} · 图 ${index + 1}/${files.length}`;
   $('#viewerPrev').style.visibility = files.length > 1 ? 'visible' : 'hidden';
   $('#viewerNext').style.visibility = files.length > 1 ? 'visible' : 'hidden';
+  /* 当前这张是否已被隐藏 → 决定按钮可用状态 */
+  const isHidden = LS.get('hidden', []).includes(name + '|' + f);
+  const hb = $('#viewerHide'), rb = $('#viewerRestore');
+  if (hb) {
+    hb.disabled = isHidden;
+    hb.textContent = isHidden ? '已隐藏' : '🙈 隐藏这张图';
+  }
+  if (rb) {
+    rb.disabled = !isHidden;
+    rb.style.opacity = isHidden ? '1' : '.5';
+  }
 }
 function closeViewer() {
   $('#viewer').classList.remove('show');
@@ -564,17 +582,83 @@ function stepViewer(d) {
   drawViewer();
 }
 function deleteViewerImage() {
+  /* 兼容旧调用：改为“隐藏” */
+  hideViewerImage();
+}
+
+/* 隐藏当前这张图（可恢复，不再叫“删除”） */
+function hideViewerImage() {
   if (!viewerState) return;
   const { name, files, index } = viewerState;
   const f = files[index];
+  if (!f) return;
   const hidden = LS.get('hidden', []);
-  hidden.push(name + '|' + f);
+  if (!hidden.includes(name + '|' + f)) hidden.push(name + '|' + f);
   LS.set('hidden', hidden);
-  toast('已删除这张图片（不再显示）');
+  toast('🙈 已隐藏这张图（可在图片下方「已隐藏」里点恢复）');
   renderImages(name);
+  /* 记住刚隐藏的是哪张，方便「恢复这张图」按钮把它找回来 */
+  const lastHidden = f;
   const left = files.filter(x => x !== f);
-  if (left.length) { viewerState = { name, files: left, index: 0 }; drawViewer(); }
-  else closeViewer();
+  if (left.length) {
+    viewerState = { name, files: left, index: Math.min(index, left.length - 1), lastHidden };
+    drawViewer();
+  } else {
+    closeViewer();
+  }
+}
+
+/* 恢复当前这张图 */
+function restoreViewerImage() {
+  if (!viewerState) return;
+  const { name, files, index } = viewerState;
+  /* 若当前这张没被隐藏，就尝试恢复“刚被隐藏的那张” */
+  const cur = files[index];
+  const target = LS.get('hidden', []).includes(name + '|' + cur) ? cur : viewerState.lastHidden;
+  if (!target) { toast('这张图没有被隐藏，无需恢复'); return; }
+  const key = name + '|' + target;
+  LS.set('hidden', LS.get('hidden', []).filter(x => x !== key));
+  toast('↩ 已恢复这张图');
+  /* 重新取该药全部图片，并定位到刚恢复的这张 */
+  const all = (APP.imgMap[name] || []).filter(x => !LS.get('hidden', []).includes(name + '|' + x));
+  viewerState = { name, files: all, index: Math.max(0, all.indexOf(target)) };
+  drawViewer();
+  renderImages(name);
+}
+
+/* 「已隐藏」面板：一键全部恢复 */
+function renderHiddenBox(name) {
+  const box = $('#hidBox');
+  if (!box) return;
+  const hidden = LS.get('hidden', []);
+  const mine = hidden.filter(x => x.startsWith(name + '|'));
+  if (!mine.length) { box.innerHTML = ''; return; }
+  box.innerHTML = `
+    <div class="hid-title">已隐藏 ${mine.length} 张（可恢复）</div>
+    <div class="hid-list">
+      ${mine.map(k => {
+        const f = k.slice(name.length + 1);
+        return `<span class="hid-item" data-file="${esc(f)}">
+                  <img src="images/${encodeURIComponent(f)}" alt="已隐藏" loading="lazy">
+                  <button class="hid-restore" data-file="${esc(f)}">恢复</button>
+                </span>`;
+      }).join('')}
+    </div>
+    <button class="btn small" id="hidRestoreAll">↩ 全部恢复</button>`;
+  box.querySelectorAll('.hid-restore').forEach(b => {
+    b.onclick = () => {
+      const f = b.dataset.file;
+      LS.set('hidden', LS.get('hidden', []).filter(x => x !== name + '|' + f));
+      toast('↩ 已恢复');
+      renderImages(name); renderHiddenBox(name);
+    };
+  });
+  const all = box.querySelector('#hidRestoreAll');
+  if (all) all.onclick = () => {
+    LS.set('hidden', LS.get('hidden', []).filter(x => !x.startsWith(name + '|')));
+    toast('↩ 已恢复该药全部图片');
+    renderImages(name); renderHiddenBox(name);
+  };
 }
 
 /* ------------------------------------------------------------------ */
@@ -1026,6 +1110,7 @@ async function boot() {
     }
     try { startClock(); } catch (e) { }
     try { renderRandomHerb(); } catch (e) { }
+    try { sprinkleMotto(); bindGuessKeys(); } catch (e) { }
     try {
       const t0 = tabFromHash();
       if (t0 !== 'browse') switchTab(t0);
@@ -1113,7 +1198,8 @@ function bindEvents() {
   $('#viewerClose').onclick = closeViewer;
   $('#viewerPrev').onclick = () => stepViewer(-1);
   $('#viewerNext').onclick = () => stepViewer(1);
-  $('#viewerDelete').onclick = deleteViewerImage;
+  $('#viewerHide').onclick = hideViewerImage;
+  $('#viewerRestore').onclick = restoreViewerImage;
   $('#viewer').onclick = e => { if (e.target.id === 'viewer') closeViewer(); };
   document.addEventListener('keydown', e => {
     if ($('#viewer').classList.contains('show')) {

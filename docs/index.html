@@ -28,6 +28,7 @@
     <button class="tab active" data-tab="browse">中药速查</button>
     <button class="tab" data-tab="random">随机中药</button>
     <button class="tab" data-tab="exam">开始测试</button>
+    <button class="tab" data-tab="guess">看图猜药</button>
     <button class="tab" data-tab="wrong">错题本</button>
     <button class="tab" data-tab="scores">成绩记录</button>
   </nav>
@@ -56,6 +57,7 @@
       <div class="card">
         <div id="detail"></div>
         <div class="imgbox" id="imgBox"></div>
+        <div class="hidbox" id="hidBox"></div>
       </div>
     </div>
   </section>
@@ -162,6 +164,18 @@
     </div>
   </section>
 
+  <!-- ========== 看图猜药 ========== -->
+  <section class="page" id="page-guess">
+    <div class="card guess-wrap">
+      <div class="guess-head">
+        <h3>看图猜药 · 识药练习</h3>
+        <span class="sub">看图片认中药，答对答错都会显示答案与药性；键盘 <b>1~4</b> 选答案、<b>Enter</b> 下一味</span>
+      </div>
+      <div id="guessBox"></div>
+      <div class="motto" id="mottoLine"></div>
+    </div>
+  </section>
+
   <!-- ========== 错题本 ========== -->
   <section class="page" id="page-wrong">
     <div class="grid wrong">
@@ -209,7 +223,8 @@
     <button class="btn" id="viewerPrev">◀ 上一张</button>
     <button class="btn" id="viewerNext">下一张 ▶</button>
     <span id="viewerCap"></span>
-    <button class="btn danger" id="viewerDelete">删掉这张图</button>
+    <button class="btn warn" id="viewerHide">🙈 隐藏这张图</button>
+    <button class="btn" id="viewerRestore">↩ 恢复这张图</button>
   </div>
 </div>
 
@@ -219,8 +234,11 @@
   中药学复习系统 · 网页版 · MIT 开源 ·
   图片来自公开网络资料，仅作学习参考 ·
   数据保存在你的浏览器本地（localStorage），不联网上传
+  <div class="foot-motto" id="footMotto"></div>
+  <div class="foot-motto-quiet">今天也来认一味药吧 —— 记住一味，就少一个坑。</div>
 </footer>
 
+<script src="encourage.js"></script>
 <script src="timeherb.js"></script>
 <script src="app.js"></script>
 </body>
