@@ -24,10 +24,10 @@ DATA = os.path.join(WEB, "data")
 IMGSRC = os.path.join(HERE, "images")
 IMGDST = os.path.join(WEB, "images")
 
-VERSION = "1.2.0"
+VERSION = "1.3.0"
 
-NOTES = ("新增：北京时间+天干地支/十二时辰/脏腑当令养生建议、随手一味随机中药（带换一味按钮）；"
-         "界面过渡与阴影优化更丝滑；修正 42 味中药图片")
+NOTES = ("新增：看图猜药（四选一识药，答对答错都显示答案）+ 鼓励与勉励语（含中医经典名言）；"
+         "图片「删除」改为「隐藏/恢复」（可逆）；单文件离线版自动内联全部样式与脚本")
 MAX_SIDE = 420
 QUALITY = 70
 

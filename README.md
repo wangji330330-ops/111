@@ -92,10 +92,14 @@ powershell -ExecutionPolicy Bypass -File build.ps1
 
 | 功能 | 说明 |
 | --- | --- |
-| 中药速查 | 搜索药名/功效/性味/归经，分类筛选；右侧显示性味、归经、功效、用法、注意 + 实物图片，**点击图片放大**（可删除不合适的图） |
+| 中药速查 | 搜索药名/功效/性味/归经，分类筛选；右侧显示性味、归经、功效、用法、注意 + 实物图片，**点击图片放大**（可**隐藏**不合适的图，随时**恢复**） |
+| 随机中药 | 随机抽一味，显示图片与完整药性；「🔁 换一味」刷新 |
 | 开始测试 | **固定 100 分制**：单选 3 分、多选 5 分、填空 3 分、判断 2 分；只调题量，合计必须正好 100 分才能开考；限时 0~300 分钟；支持随机出题、错题强化、练习模式 |
+| 看图猜药 | 看图片四选一识药；**答对答错都显示答案**（性味/归经/功效/用法/注意）；同分类干扰项；键盘 `1~4` 选答案、`Enter` 下一味；可「先遮住图片」；带统计（正确率、连对） |
 | 错题本 | 按错误次数排序，右侧看该药资料；支持导出文本、一键错题强化 |
 | 成绩记录 | 总览统计 + 得分趋势图 + 明细表 |
+| 时辰养生 | 顶部实时**北京时间** + 天干地支（年月日时）+ 生肖 + 十二时辰 + **脏腑当令** + 养生宜忌 + 推荐药材（取自题库，可点击跳转） |
+| 鼓励勉励 | 答对给鼓励、答错给勉励；另附中医经典名言（《伤寒杂病论序》《备急千金要方》《荀子》等），出现在猜药页底部与页脚细微处 |
 | 判分 | 多选全对满分/漏选一半/错选不得分；填空支持同义词与错别字容错；同一套试卷题目不重复 |
 
 网页版数据保存在浏览器 `localStorage`（不联网上传）；桌面版保存在 `%LocalAppData%\TcmReview\`。
@@ -108,17 +112,22 @@ powershell -ExecutionPolicy Bypass -File build.ps1
 ├─ docs/                    网页版（部署这个目录）
 │   ├─ index.html          单页应用
 │   ├─ app.js              出题引擎 + 界面逻辑
-│   ├─ style.css
+│   ├─ timeherb.js         时辰养生（北京时间/干支/脏腑当令）+ 随机中药
+│   ├─ encourage.js        看图猜药 + 鼓励勉励语 + 中医名言
+│   ├─ style.css / style2.css
 │   ├─ version.json        版本与更新信息（改这里即可推送更新）
 │   ├─ data/               题库、同义词、图片索引
-│   └─ images/             573 张中药图片
+│   ├─ images/             579 张中药图片
+│   └─ 离线版.html          单文件离线版（双击即用，已在 docs/ 内）
 ├─ src/                    桌面版 C# 源码
 ├─ tools/                  图片打包/抓取/审查脚本
+│   ├─ webtest.js          网页版出题与判分自测
+│   └─ featuretest.js      看图猜药 + 图片隐藏/恢复自测
 ├─ images/                 原始图片库（桌面版打包用）
 ├─ build_herbs.py          题库数据源（每味药一行，改这里可增改药物）
 ├─ build.ps1               桌面版一键编译
 ├─ make_web.py             生成网页版数据
-├─ webtest.js              网页版功能自测
+├─ make_singlefile.py      生成单文件离线版（自动内联全部 CSS/JS）
 ├─ 使用说明.md             桌面版使用说明
 └─ LICENSE                 MIT
 ```
@@ -126,9 +135,11 @@ powershell -ExecutionPolicy Bypass -File build.ps1
 ## 五、自测
 
 ```bash
-python make_web.py     # 生成网页版数据
-node webtest.js        # 网页版：出题与判分自测（应输出 WEB SELFTEST PASS）
-powershell -File build.ps1   # 桌面版编译 + 自测
+python make_web.py            # 生成网页版数据
+node tools/webtest.js         # 网页版：出题与判分自测（应输出 WEB SELFTEST PASS）
+node tools/featuretest.js     # 看图猜药 + 图片隐藏/恢复自测（应输出 FEATURE SELFTEST PASS）
+powershell -File build.ps1    # 桌面版编译 + 自测（应输出 SELFTEST PASS）
+python make_singlefile.py     # 生成单文件离线版（会自动内联全部 CSS/JS）
 ```
 
 ## 六、免责声明
