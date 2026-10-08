@@ -120,10 +120,13 @@ body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; 
 /* 分类标签：hover 只加浅绿底、字色保持深色，避免“白字变隐形” */
 .chip:hover { background: var(--brand-light); border-color: #bfdccd; }
 .chip.active:hover { background: var(--brand); color: #fff; }
-/* 注意：不要给 .tab:hover 改字色 —— 深绿顶栏上的浅绿字一旦变纯白，
-   落在浅色底上就会“隐身”。这里只在 hover 时加一点底，保持原字色。 */
+/* 导航标签 hover：只加一点底，且不得覆盖“选中”外观。
+   注意顺序：.tab:hover 会与 style.css 的 .tab.active 同优先级，
+   后加载的这条会胜出，所以必须在其后再声明 .tab.active（含 hover），
+   否则一 hover 选中的标签底色就被冲掉，看着像没选中。 */
 .tab:hover { background: rgba(255, 255, 255, .18); }
-.tab.active:hover { color: var(--brand); }
+.tab.active,
+.tab.active:hover { background: var(--bg); color: var(--brand); font-weight: 700; }
 .card { transition: box-shadow .25s ease, transform .25s ease; }
 .card:hover { box-shadow: 0 4px 22px rgba(20, 40, 32, .08); }
 .page { animation: pageIn .26s cubic-bezier(.22, .61, .36, 1); }
