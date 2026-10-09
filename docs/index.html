@@ -6,8 +6,8 @@
 <title>中药学复习系统 · 网页版</title>
 <meta name="description" content="中药学复习系统网页版：中药速查（含实物图片）、100 分制限时测试、错题本、成绩记录。开源、纯静态、手机可用。">
 <meta name="theme-color" content="#1f6f54">
-<link rel="stylesheet" href="style.css">
-<link rel="stylesheet" href="style2.css">
+<link rel="stylesheet" href="style.css?v=141">
+<link rel="stylesheet" href="style2.css?v=141">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='48' fill='%231f6f54'/><text x='50' y='68' font-size='58' text-anchor='middle' fill='white' font-family='SimHei'>药</text></svg>">
 </head>
 <body>
@@ -20,9 +20,8 @@
       <div class="sub" id="subLine">题库加载中…</div>
     </div>
     <div class="right">
-      <span class="ver" id="verLabel"></span>
+      <button class="btn small ghost" id="changelogBtn">更新日志 <span class="ver" id="verLabel"></span></button>
       <button class="btn small" id="checkUpdateBtn">检查更新</button>
-      <button class="btn small ghost" id="changelogBtn">更新日志</button>
     </div>
   </div>
   <nav class="tabs">
@@ -246,7 +245,7 @@
   <div class="cl-box">
     <div class="cl-bar">
       <b>更新日志</b>
-      <span class="cl-hint">版本号规则：小更新 +0.01（加药材 / 换图 / 修小问题），大更新 +0.1（新功能）</span>
+      <span class="cl-hint" id="clHint"></span>
       <button class="btn small" id="clClose">关闭 ✕</button>
     </div>
     <div id="clBody" class="cl-body"></div>

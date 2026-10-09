@@ -643,19 +643,17 @@ main { padding-bottom: 26px; }
 .cl-list li { font-size: 13.5px; line-height: 1.75; color: #3f4a45; }
 #changelogBtn.ghost { background: rgba(255, 255, 255, .14); border-color: rgba(255, 255, 255, .3); color: #eaf7f2; }
 #changelogBtn.ghost:hover { background: rgba(255, 255, 255, .24); color: #fff; }
+#changelogBtn .ver { font-size: 11.5px; color: #cfe4db; font-weight: 400; margin-left: 2px; }
 
-/* 顶栏右侧：版本号 + 两个按钮，宽度不够时换到第二行，避免被挤出可视区 */
+/* 顶栏右侧：保持在一行右侧（标题过长时才换行，且换行后仍靠右） */
 .headline { column-gap: 10px; }
-.headline .right { flex-wrap: wrap; justify-content: flex-end; row-gap: 6px; }
+.headline h1 { white-space: nowrap; }
+.headline .right { flex-wrap: wrap; justify-content: flex-end; row-gap: 4px; }
 .headline .right .btn.small { white-space: nowrap; }
-/* 1360px 以下：整行标题容易把右侧挤出去，直接把右侧放到自己一行 */
-@media (max-width: 1360px) {
+@media (max-width: 820px) {
   .headline { flex-wrap: wrap; }
-  .headline .right { width: 100%; margin-left: 0; justify-content: flex-start; }
-  .headline .right .ver { order: 3; flex-basis: 100%; }
-}
-@media (max-width: 1360px) {
-  header h1 { font-size: 18px; }
+  .headline .right { width: 100%; margin-left: 0; justify-content: flex-end; }
+  header h1 { font-size: 17px; }
   .sub { font-size: 11.5px; }
 }
 
@@ -672,9 +670,8 @@ main { padding-bottom: 26px; }
       <div class="sub" id="subLine">题库加载中…</div>
     </div>
     <div class="right">
-      <span class="ver" id="verLabel"></span>
+      <button class="btn small ghost" id="changelogBtn">更新日志 <span class="ver" id="verLabel"></span></button>
       <button class="btn small" id="checkUpdateBtn">检查更新</button>
-      <button class="btn small ghost" id="changelogBtn">更新日志</button>
     </div>
   </div>
   <nav class="tabs">
@@ -898,7 +895,7 @@ main { padding-bottom: 26px; }
   <div class="cl-box">
     <div class="cl-bar">
       <b>更新日志</b>
-      <span class="cl-hint">版本号规则：小更新 +0.01（加药材 / 换图 / 修小问题），大更新 +0.1（新功能）</span>
+      <span class="cl-hint" id="clHint"></span>
       <button class="btn small" id="clClose">关闭 ✕</button>
     </div>
     <div id="clBody" class="cl-body"></div>

@@ -13,6 +13,7 @@
 import io
 import json
 import os
+import re
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 WEB = os.path.join(HERE, "docs")
@@ -31,13 +32,15 @@ def main():
     html = read(os.path.join(WEB, "index.html"))
 
     # ---- 内联全部样式表 ----
+    # 注意：index.html 里可能带缓存参数（如 style2.css?v=141），
+    # 所以用正则匹配而不是精确字符串，否则会漏内联。
     for name in CSS_FILES:
-        tag = '<link rel="stylesheet" href="%s">' % name
-        if tag not in html:
+        pat = re.compile(r'<link rel="stylesheet" href="%s(?:\?[^"]*)?">' % re.escape(name))
+        if not pat.search(html):
             print("警告：index.html 中未找到 %s 的引用，已跳过" % name)
             continue
         css = read(os.path.join(WEB, name))
-        html = html.replace(tag, "<style>\n/* ==== %s ==== */\n%s\n</style>" % (name, css))
+        html = pat.sub(lambda m: "<style>\n/* ==== %s ==== */\n%s\n</style>" % (name, css), html, count=1)
 
     # ---- 内嵌数据（必须在脚本之前） ----
     data = {
