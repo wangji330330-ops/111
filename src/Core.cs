@@ -110,7 +110,7 @@ namespace TcmReview
             {
                 if (_cur == null)
                 {
-                    try { _cur = LoadFromString(EmbeddedData.HerbsJson); }
+                    try { _cur = LoadFromString(EmbeddedData.HerbsJson()); }
                     catch (Exception ex)
                     {
                         MessageBox.Show("题库数据解析失败：" + ex.Message, "错误",

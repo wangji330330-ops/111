@@ -24,10 +24,10 @@ DATA = os.path.join(WEB, "data")
 IMGSRC = os.path.join(HERE, "images")
 IMGDST = os.path.join(WEB, "images")
 
-VERSION = "1.3.0"
+VERSION = "1.4.0"
 
-NOTES = ("新增：看图猜药（四选一识药，答对答错都显示答案）+ 鼓励与勉励语（含中医经典名言）；"
-         "图片「删除」改为「隐藏/恢复」（可逆）；单文件离线版自动内联全部样式与脚本")
+NOTES = ("题库大扩充：294 → 446 味（覆盖《中药学》教材常用 ∪ 临床/药房常用），分类 43 → 50；"
+         "新增 446 味全部配实物图片（885 张，全部人工核验）；修复桌面版 CS1647 编译限制")
 MAX_SIDE = 420
 QUALITY = 70
 

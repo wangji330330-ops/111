@@ -378,6 +378,26 @@ SYNONYMS = [
 ]
 
 def main():
+    # ---- 合并扩充数据（herbs_additions.py 里的 ADDITIONS_* 分批追加） ----
+    global RAW
+    try:
+        import herbs_additions as _add
+    except ImportError:
+        _add = None
+    if _add is not None:
+        # 只合并“已启用”的批次：通过 ENABLED_BATCHES 控制，默认 1
+        enabled = getattr(_add, "ENABLED_BATCHES", [1])
+        extra = []
+        for n in enabled:
+            name = "ADDITIONS_%d" % n
+            if hasattr(_add, name):
+                extra.extend(getattr(_add, name))
+            else:
+                print("警告：herbs_additions.py 中没有 %s" % name)
+        if extra:
+            RAW = RAW + extra
+            print("已合并扩充数据：%d 味（批次 %s）" % (len(extra), enabled))
+
     data = []
     seen = set()
     errs = []
