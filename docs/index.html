@@ -46,11 +46,21 @@
   <section class="page active" id="page-browse">
     <div class="grid browse">
       <div class="card">
-        <input type="text" id="search" placeholder="搜索药名 / 功效 / 性味 / 归经">
+        <div class="searchwrap">
+          <input type="text" id="search" placeholder="搜索药名 / 功效 / 性味 / 归经">
+          <button type="button" class="clearBtn hide" id="clearSearch" title="清空搜索" aria-label="清空搜索">✕</button>
+        </div>
         <label class="inline" style="margin-top:8px">
           <input type="checkbox" id="onlyWrong"> 只看错题本中的药物
         </label>
-        <div class="chips" id="catChips"></div>
+        <div class="cathead">
+          <span class="catlabel">分类筛选</span>
+          <span class="catnow" id="catNow"></span>
+          <button type="button" class="btn small ghost" id="catToggle">收起</button>
+        </div>
+        <div id="catWrap">
+          <div class="chips" id="catChips"></div>
+        </div>
         <div class="list" id="herbList"></div>
         <div class="sub" id="herbCount" style="margin-top:6px"></div>
       </div>

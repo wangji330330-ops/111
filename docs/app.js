@@ -481,17 +481,95 @@ function applyHash() {
 /* ------------------------------------------------------------------ */
 let browseCat = '';
 let browseName = '';   /* 当前查看的药名（用于 #browse/药名 直达与分享） */
+let browseGroup = '';  /* 当前展开的大类（空=未展开，只显示大类标签） */
+
+/* 把 43 个子分类按“大类”归组：大类·小类 -> 大类 -> [小类...] */
+function groupCategories() {
+  const g = [];
+  const map = {};
+  APP.categories.forEach(c => {
+    const i = c.indexOf('·');
+    const major = i < 0 ? c : c.slice(0, i);
+    if (!map[major]) { map[major] = []; g.push({ major, subs: map[major] }); }
+    map[major].push(c);
+  });
+  return g;
+}
 
 function renderCategoryChips() {
   const box = $('#catChips');
-  box.innerHTML = `<button class="chip active" data-cat="">全部分类</button>` +
-    APP.categories.map(c => `<button class="chip" data-cat="${esc(c)}">${esc(c)}</button>`).join('');
+  const groups = groupCategories();
+  const cur = APP.categories.includes(browseCat) ? browseCat : '';
+  /* 当前展开的大类：优先用 browseGroup，否则由已选分类推断 */
+  const openMajor = browseGroup || (cur ? cur.split('·')[0] : '');
+
+  /* 折叠式：平时只显示大类（一行装得下），点大类才展开它的子类 */
+  let html = '<div class="cgroup">' +
+    '<button class="chip active" data-cat="">全部分类</button>';
+  groups.forEach(gr => {
+    const hasSub = gr.subs.length > 1 || gr.subs[0] !== gr.major;
+    const open = openMajor === gr.major;
+    const cls = ['chip', 'major'];
+    if (open) cls.push('open');
+    if (hasSub) cls.push('has-sub');
+    html += `<button class="${cls.join(' ')}" data-major="${esc(gr.major)}"` +
+            `${hasSub ? '' : ` data-cat="${esc(gr.subs[0])}"`}>` +
+            `${esc(gr.major)}<span class="n">${gr.subs.length}</span>` +
+            `${hasSub ? '<span class="ar">' + (open ? '▾' : '▸') + '</span>' : ''}</button>`;
+  });
+  html += '</div>';
+
+  if (openMajor) {
+    const gr = groups.find(x => x.major === openMajor);
+    const subs = gr ? gr.subs : [];
+    if (subs.length > 1) {
+      html += '<div class="csub">' +
+        subs.map(s => `<button class="chip sub${s === cur ? ' active' : ''}" data-cat="${esc(s)}">` +
+                      `${esc(s.split('·')[1] || s)}</button>`).join('') +
+        '</div>';
+    }
+  }
+  box.innerHTML = html;
+
+  /* 当前筛选状态提示 */
+  const now = $('#catNow');
+  if (now) {
+    const cnt = filteredHerbs().length;
+    now.textContent = browseCat ? `当前：${browseCat}（${cnt} 味）` : `当前：全部分类（${cnt} 味）`;
+  }
+
   box.onclick = e => {
     const b = e.target.closest('.chip');
     if (!b) return;
-    browseCat = b.dataset.cat;
-    $$('.chip', box).forEach(x => x.classList.toggle('active', x === b));
-    renderHerbList();
+    /* ① 全部分类 */
+    if (b.dataset.cat === '') {
+      browseCat = ''; browseGroup = '';
+      renderCategoryChips(); renderHerbList();
+      return;
+    }
+    /* ② 具体子类 */
+    if (b.dataset.cat) {
+      browseCat = b.dataset.cat;
+      renderCategoryChips(); renderHerbList();
+      return;
+    }
+    /* ③ 大类：有子类则显示子类（默认选第一个）；再点一次收起 */
+    const major = b.dataset.major;
+    const gr = groupCategories().find(x => x.major === major);
+    if (!gr) return;
+    if (gr.subs.length > 1) {
+      if (browseGroup === major && browseCat) {
+        /* 已经在这个大类里 → 收起，回到全部 */
+        browseCat = ''; browseGroup = '';
+      } else {
+        browseGroup = major;
+        browseCat = gr.subs[0];
+      }
+    } else {
+      browseGroup = '';
+      browseCat = gr.subs[0];
+    }
+    renderCategoryChips(); renderHerbList();
   };
 }
 
@@ -1151,7 +1229,35 @@ async function boot() {
 
 function bindEvents() {
   $$('.tab').forEach(b => b.onclick = () => switchTab(b.dataset.tab));
-  $('#search').oninput = renderHerbList;
+  /* 搜索框：输入即筛；有内容时显示 ✕ 清空按钮 */
+  const search = $('#search'), clearBtn = $('#clearSearch');
+  const syncClear = () => { if (clearBtn) clearBtn.classList.toggle('hide', !search.value); };
+  search.oninput = () => { syncClear(); renderHerbList(); };
+  search.onkeydown = e => { if (e.key === 'Escape') { search.value = ''; syncClear(); renderHerbList(); } };
+  if (clearBtn) {
+    clearBtn.onclick = () => {
+      search.value = '';
+      syncClear();
+      renderHerbList();
+      search.focus();
+    };
+  }
+  syncClear();
+  /* 分类区收起/展开（减少杂乱） */
+  const catToggle = $('#catToggle'), catWrap = $('#catWrap');
+  if (catToggle && catWrap) {
+    let closed = LS.get('catClosed', false);
+    const applyClosed = () => {
+      catWrap.classList.toggle('hide', !!closed);
+      catToggle.textContent = closed ? '展开' : '收起';
+    };
+    applyClosed();
+    catToggle.onclick = () => {
+      closed = !closed;
+      LS.set('catClosed', closed);
+      applyClosed();
+    };
+  }
   $('#onlyWrong').onchange = renderHerbList;
   ['n1', 'n2', 'n3', 'n4', 'minutes', 'immediate', 'mode'].forEach(id => {
     $('#' + id).oninput = updateTotal;
