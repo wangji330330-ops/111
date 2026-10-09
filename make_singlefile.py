@@ -19,7 +19,7 @@ WEB = os.path.join(HERE, "docs")
 OUT_DIR = os.path.join(HERE, "发布")
 
 CSS_FILES = ["style.css", "style2.css"]
-JS_FILES = ["encourage.js", "timeherb.js", "app.js"]
+JS_FILES = ["changelog.js", "encourage.js", "timeherb.js", "app.js"]
 
 
 def read(p):

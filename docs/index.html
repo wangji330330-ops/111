@@ -22,6 +22,7 @@
     <div class="right">
       <span class="ver" id="verLabel"></span>
       <button class="btn small" id="checkUpdateBtn">检查更新</button>
+      <button class="btn small ghost" id="changelogBtn">更新日志</button>
     </div>
   </div>
   <nav class="tabs">
@@ -240,6 +241,18 @@
 
 <div id="toast"></div>
 
+<!-- 更新日志 -->
+<div id="clModal">
+  <div class="cl-box">
+    <div class="cl-bar">
+      <b>更新日志</b>
+      <span class="cl-hint">版本号规则：小更新 +0.01（加药材 / 换图 / 修小问题），大更新 +0.1（新功能）</span>
+      <button class="btn small" id="clClose">关闭 ✕</button>
+    </div>
+    <div id="clBody" class="cl-body"></div>
+  </div>
+</div>
+
 <footer>
   中药学复习系统 · 网页版 · MIT 开源 ·
   图片来自公开网络资料，仅作学习参考 ·
@@ -248,6 +261,7 @@
   <div class="foot-motto-quiet">今天也来认一味药吧 —— 记住一味，就少一个坑。</div>
 </footer>
 
+<script src="changelog.js"></script>
 <script src="encourage.js"></script>
 <script src="timeherb.js"></script>
 <script src="app.js"></script>

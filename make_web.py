@@ -24,10 +24,10 @@ DATA = os.path.join(WEB, "data")
 IMGSRC = os.path.join(HERE, "images")
 IMGDST = os.path.join(WEB, "images")
 
-VERSION = "1.4.0"
+VERSION = "1.4.1"
 
-NOTES = ("题库大扩充：294 → 446 味（覆盖《中药学》教材常用 ∪ 临床/药房常用），分类 43 → 50；"
-         "新增 446 味全部配实物图片（885 张，全部人工核验）；修复桌面版 CS1647 编译限制")
+NOTES = ("1.4.1：修复分类筛选两个 bug（全部分类常亮、子类行停留在上一大类）；"
+         "搜索框加一键清空；分类改为大类+子类折叠；新增更新日志")
 MAX_SIDE = 420
 QUALITY = 70
 

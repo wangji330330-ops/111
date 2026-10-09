@@ -483,6 +483,18 @@ let browseCat = '';
 let browseName = '';   /* 当前查看的药名（用于 #browse/药名 直达与分享） */
 let browseGroup = '';  /* 当前展开的大类（空=未展开，只显示大类标签） */
 
+/* 记住筛选状态，避免刷新/切换标签后错位或丢失 */
+function saveBrowse() {
+  try { LS.set('browseCat', browseCat || ''); } catch (e) { }
+}
+function restoreBrowse() {
+  try {
+    const c = LS.get('browseCat', '');
+    if (c && APP.categories.includes(c)) { browseCat = c; browseGroup = c.split('·')[0]; }
+    else { browseCat = ''; browseGroup = ''; }
+  } catch (e) { browseCat = ''; browseGroup = ''; }
+}
+
 /* 把 43 个子分类按“大类”归组：大类·小类 -> 大类 -> [小类...] */
 function groupCategories() {
   const g = [];
@@ -503,14 +515,19 @@ function renderCategoryChips() {
   /* 当前展开的大类：优先用 browseGroup，否则由已选分类推断 */
   const openMajor = browseGroup || (cur ? cur.split('·')[0] : '');
 
-  /* 折叠式：平时只显示大类（一行装得下），点大类才展开它的子类 */
+  /* 折叠式：平时只显示大类（一行装得下），点大类才展开它的子类。
+     注意：browseCat 与 browseGroup 必须始终一致，否则子类行会停留在上一个大类。 */
+  const allActive = !browseCat;
   let html = '<div class="cgroup">' +
-    '<button class="chip active" data-cat="">全部分类</button>';
+    `<button class="chip${allActive ? ' active' : ''}" data-cat="">全部分类</button>`;
   groups.forEach(gr => {
     const hasSub = gr.subs.length > 1 || gr.subs[0] !== gr.major;
     const open = openMajor === gr.major;
+    /* 该大类下是否命中当前筛选 */
+    const inThis = !!browseCat && browseCat.split('·')[0] === gr.major;
     const cls = ['chip', 'major'];
     if (open) cls.push('open');
+    if (inThis) cls.push('active');
     if (hasSub) cls.push('has-sub');
     html += `<button class="${cls.join(' ')}" data-major="${esc(gr.major)}"` +
             `${hasSub ? '' : ` data-cat="${esc(gr.subs[0])}"`}>` +
@@ -538,38 +555,34 @@ function renderCategoryChips() {
     now.textContent = browseCat ? `当前：${browseCat}（${cnt} 味）` : `当前：全部分类（${cnt} 味）`;
   }
 
+  /* 统一的“应用筛选”入口：一次点击只渲染一次，且保证状态一致 + 记忆 */
+  const applyCat = (cat, group) => {
+    browseCat = cat || '';
+    if (group !== undefined) browseGroup = group || '';
+    else browseGroup = browseCat ? browseCat.split('·')[0] : '';
+    if (!browseCat) browseGroup = '';
+    saveBrowse();
+    renderCategoryChips();
+    renderHerbList();
+  };
+
   box.onclick = e => {
     const b = e.target.closest('.chip');
     if (!b) return;
     /* ① 全部分类 */
-    if (b.dataset.cat === '') {
-      browseCat = ''; browseGroup = '';
-      renderCategoryChips(); renderHerbList();
-      return;
-    }
+    if (b.dataset.cat === '') { applyCat('', ''); return; }
     /* ② 具体子类 */
-    if (b.dataset.cat) {
-      browseCat = b.dataset.cat;
-      renderCategoryChips(); renderHerbList();
-      return;
-    }
-    /* ③ 大类：有子类则显示子类（默认选第一个）；再点一次收起 */
+    if (b.dataset.cat) { applyCat(b.dataset.cat, b.dataset.cat.split('·')[0]); return; }
+    /* ③ 大类：有子类则展开（默认选第一个）；已在其中则收起 */
     const major = b.dataset.major;
     const gr = groupCategories().find(x => x.major === major);
     if (!gr) return;
     if (gr.subs.length > 1) {
-      if (browseGroup === major && browseCat) {
-        /* 已经在这个大类里 → 收起，回到全部 */
-        browseCat = ''; browseGroup = '';
-      } else {
-        browseGroup = major;
-        browseCat = gr.subs[0];
-      }
+      if (browseGroup === major && browseCat) applyCat('', '');
+      else applyCat(gr.subs[0], major);
     } else {
-      browseGroup = '';
-      browseCat = gr.subs[0];
+      applyCat(gr.subs[0], '');
     }
-    renderCategoryChips(); renderHerbList();
   };
 }
 
@@ -1199,6 +1212,7 @@ async function boot() {
     APP.imgMap = imgs || {};
     APP.version = herbs.meta.version || APP.version;
     buildIndex();
+    restoreBrowse();          /* 恢复上次的筛选状态，避免错位/丢失 */
     renderCategoryChips();
     renderHerbList();
     applyCfgToUI();
@@ -1304,6 +1318,14 @@ function bindEvents() {
     }
   };
   $('#checkUpdateBtn').onclick = () => checkUpdate(true);
+  /* 更新日志 */
+  const clBtn = $('#changelogBtn'), clBox = $('#clModal'), clClose = $('#clClose');
+  if (clBtn) clBtn.onclick = () => openChangelog();
+  if (clClose) clClose.onclick = () => closeChangelog();
+  if (clBox) clBox.onclick = e => { if (e.target === clBox) closeChangelog(); };
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && clBox && clBox.classList.contains('show')) closeChangelog();
+  });
   $('#clearWrong').onclick = () => {
     if (confirm('确定清空错题本吗？')) { LS.set('wrong', {}); renderWrong(); toast('已清空'); }
   };
