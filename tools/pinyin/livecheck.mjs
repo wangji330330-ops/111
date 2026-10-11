@@ -1,4 +1,4 @@
-// 发布后校验：把线上文件与本地文件做（行尾归一化后的）逐字节比对，并抽查关键内容。
+﻿// 发布后校验：把线上文件与本地文件做（行尾归一化后的）逐字节比对，并抽查关键内容。
 // 用法: node tools/pinyin/livecheck.mjs
 import fs from 'node:fs';
 import path from 'node:path';
@@ -46,7 +46,8 @@ for (const [f, needle] of checks) {
   console.log(`  ${okk ? '✓' : '✗'} ${f} 含 ${JSON.stringify(needle)}`);
 }
 const v = await (await fetch(BASE + 'version.json?_=' + Date.now(), { cache: 'no-store' })).json();
-const vok = v.version === '1.5.0';
+const CUR = JSON.parse(fs.readFileSync(path.join(ROOT, 'docs', 'version.json'), 'utf8')).version;
+const vok = v.version === CUR;
 if (!vok) bad++;
 console.log(`  ${vok ? '✓' : '✗'} 线上版本 = ${v.version}`);
 
