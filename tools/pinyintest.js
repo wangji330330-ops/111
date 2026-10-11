@@ -68,7 +68,16 @@ const EXPECT = {
   '莪术 ': 'É Zhú', '紫贝齿': 'Zǐ Bèi Chǐ', '瓦楞子': 'Wǎ Léng Zǐ', '娑罗子': 'Suō Luó Zǐ',
   '秦皮': 'Qín Pí', '金荞麦': 'Jīn Qiáo Mài', '白蔹': 'Bái Liǎn', '漏芦': 'Lòu Lú',
   '山慈菇': 'Shān Cí Gū', '鹤虱': 'Hè Shī', '榧子': 'Fěi Zǐ', '刺猬皮': 'Cì Wèi Pí',
-  '木槿皮': 'Mù Jǐn Pí', '婆罗子': 'Suō Luó Zǐ', '马勃': 'Mǎ Bó', '贯众': 'Guàn Zhòng'
+  '木槿皮': 'Mù Jǐn Pí', '婆罗子': 'Suō Luó Zǐ', '马勃': 'Mǎ Bó', '贯众': 'Guàn Zhòng',
+  /* 教材第 5 版新增药（见 herbs_additions.ADDITIONS_5） */
+  '香薷': 'Xiāng Rú', '穿心莲': 'Chuān Xīn Lián', '千里光': 'Qiān Lǐ Guāng',
+  '大血藤': 'Dà Xuè Téng', '败酱草': 'Bài Jiàng Cǎo', '垂盆草': 'Chuí Pén Cǎo',
+  '地耳草': 'Dì Ěr Cǎo', '徐长卿': 'Xú Cháng Qīng', '油松节': 'Yóu Sōng Jié',
+  '松花粉': 'Sōng Huā Fěn', '芜荑': 'Wú Yí', '马钱子': 'Mǎ Qián Zǐ',
+  '紫石英': 'Zǐ Shí Yīng', '沙棘': 'Shā Jí', '蛤蟆油': 'Há Má Yóu',
+  '木鳖子': 'Mù Biē Zǐ', '樟脑': 'Zhāng Nǎo', '大蒜': 'Dà Suàn',
+  '半枝莲': 'Bàn Zhī Lián', '龙葵': 'Lóng Kuí', '蛇莓': 'Shé Méi',
+  '藤梨根': 'Téng Lí Gēn', '石见穿': 'Shí Jiàn Chuān', '冬凌草': 'Dōng Líng Cǎo'
 };
 const map = {};
 herbs.forEach(h => { map[h.n] = h.p; });
@@ -86,6 +95,22 @@ if (!expBad && expN > 50) ok('人工审定读音全部正确');
 const ziBad = herbs.filter(h => h.n.includes('子') && h.p.split(/\s+/)[h.n.indexOf('子')] !== 'Zǐ');
 if (ziBad.length) ziBad.forEach(h => mark('“子”未读 zǐ: ' + h.n + ' -> ' + h.p));
 else ok('含“子”的药一律读 Zǐ（' + herbs.filter(h => h.n.includes('子')).length + ' 条）');
+
+/* ------------------------------------------------------------------ */
+/* 2b) 分类结构（对齐《中药学》第 5 版）                                */
+/* ------------------------------------------------------------------ */
+const cats = JSON.parse(fs.readFileSync(path.join(docs, 'data', 'herbs.json'), 'utf8')).meta.categories;
+const catSet = new Set(cats);
+const mustHave = ['抗癌药', '化湿药', '收涩药·敛肺涩肠药', '收涩药·固精缩尿止带药',
+  '解表药·疏散风热药', '祛风湿药·祛风湿散寒药', '攻毒杀虫止痒药'];
+const goneCats = ['化湿药·芳香化湿药', '收涩药·涩肠止泻药', '收涩药·涩精缩尿止带药',
+  '解表药·发散风热药', '祛风湿药·祛风寒湿药', '杀虫止痒药'];
+let cb = 0;
+mustHave.forEach(c => { if (!catSet.has(c)) { cb++; mark('缺少分类: ' + c); } });
+goneCats.forEach(c => { if (catSet.has(c)) { cb++; mark('重复分类未归并: ' + c); } });
+const anti = herbs.filter(h => h.c === '抗癌药').map(h => h.n);
+if (anti.length < 5) { cb++; mark('抗癌药章节药味过少: ' + anti.length); }
+if (!cb) ok(`分类结构正确（${cats.length} 类，抗癌药 ${anti.length} 味：${anti.join('、')}）`);
 
 /* ------------------------------------------------------------------ */
 /* 3) 检索：拼音归一化（用 app.js 里的真实实现）                      */
@@ -203,7 +228,7 @@ for (const [name, good] of pairs) { if (good) ok(name); else { pbad++; mark('未
   /* 速查列表 */
   R.renderHerbList();
   const listHtml = nodes['herbList'].innerHTML;
-  if (listHtml.includes('class="row-py"') && listHtml.includes('Má Huáng')) ok('速查列表渲染出拼音（446 行）');
+  if (listHtml.includes('class="row-py"') && listHtml.includes('Má Huáng')) ok(`速查列表渲染出拼音（${herbs.length} 行）`);
   else mark('速查列表没有拼音');
 
   /* 详情页（renderHerbList 会默认选中第一味 = 麻黄） */

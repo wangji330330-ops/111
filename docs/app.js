@@ -473,6 +473,17 @@ function tabFromHash() {
   return { tab: ok.includes(tab) ? tab : 'browse', arg: arg ? decodeURIComponent(arg) : '' };
 }
 
+/* 设置搜索词：必须同步“✕ 清空”按钮的显隐。
+   从看图猜药 / 随机中药 / 错题本跳进速查时是直接赋值，
+   不会触发 oninput，所以清空按钮以前不会出现。 */
+function setSearch(v) {
+  const s = $('#search');
+  if (!s) return;
+  s.value = v == null ? '' : v;
+  const c = $('#clearSearch');
+  if (c) c.classList.toggle('hide', !s.value);
+}
+
 /* 应用 hash：切换标签页，若带药名则定位到该药 */
 function applyHash() {
   const { tab, arg } = tabFromHash();
@@ -480,8 +491,7 @@ function applyHash() {
   if (tab === 'browse' && arg) {
     const h = herbByName(arg);
     if (h) {
-      const s = $('#search');
-      if (s) s.value = arg;
+      setSearch(arg);
       browseCat = '';
       renderHerbList();
       showHerb(arg);
@@ -616,6 +626,13 @@ function filteredHerbs() {
   });
 }
 
+/* 搜不到药材时的提示（列表与详情区都显示） */
+const MISS_HTML = `<div class="empty miss">
+  <div class="miss-face">暂时没有该药材哦~OVO</div>
+  <div class="miss-sub">后续会更新嘟，或者联系我来更新吧！</div>
+  <a class="miss-mail" href="mailto:wangji330330@gmail.com?subject=%E8%8D%AF%E6%9D%90%E7%94%B3%E8%AF%B7">📫 wangji330330@gmail.com</a>
+</div>`;
+
 function renderHerbList() {
   const list = filteredHerbs();
   $('#herbCount').textContent = `共 ${list.length} 味（题库 ${APP.herbs.length} 味）`;
@@ -625,14 +642,14 @@ function renderHerbList() {
        <span class="row-name">${esc(h.n)}</span>
        ${h.p ? `<span class="row-py">${esc(h.p)}</span>` : ''}
        <span class="row-cat">${esc(h.c.split('·')[0])}</span>
-     </div>`).join('') || '<div class="empty">没有匹配的药物</div>';
+     </div>`).join('') || MISS_HTML;
   // 点击（含触摸）选中药物 —— 修复：之前速查列表漏绑事件，点不动
   box.onclick = e => {
     const row = e.target.closest('.row');
     if (row && row.dataset.name) showHerb(row.dataset.name);
   };
   if (list.length) showHerb(list[0].n);
-  else $('#detail').innerHTML = '';
+  else $('#detail').innerHTML = MISS_HTML;
 }
 
 function showHerb(name) {
@@ -1144,7 +1161,7 @@ function renderWrong() {
       <dt>用法</dt><dd>${esc(h.u)}</dd><dt>注意</dt><dd>${esc(h.k)}</dd></dl>`;
     $('#goBrowse').onclick = () => {
       switchTab('browse');
-      $('#search').value = h.n;
+      setSearch(h.n);
       browseCat = '';
       renderCategoryChips();
       renderHerbList();
@@ -1266,16 +1283,15 @@ function bindEvents() {
   const search = $('#search'), clearBtn = $('#clearSearch');
   const syncClear = () => { if (clearBtn) clearBtn.classList.toggle('hide', !search.value); };
   search.oninput = () => { syncClear(); renderHerbList(); };
-  search.onkeydown = e => { if (e.key === 'Escape') { search.value = ''; syncClear(); renderHerbList(); } };
+  search.onkeydown = e => { if (e.key === 'Escape') { setSearch(''); renderHerbList(); } };
   if (clearBtn) {
     clearBtn.onclick = () => {
-      search.value = '';
-      syncClear();
+      setSearch('');
       renderHerbList();
       search.focus();
     };
   }
-  syncClear();
+  setSearch(search.value);
   /* 分类区收起/展开（减少杂乱） */
   const catToggle = $('#catToggle'), catWrap = $('#catWrap');
   if (catToggle && catWrap) {

@@ -389,3 +389,16 @@ main { padding-bottom: 26px; }
   .row-py { display: none; }        /* 窄屏列表优先保药名与分类 */
   .py-name { font-size: 14px; }
 }
+
+/* ------------------------------------------------------------------ */
+/* 搜不到药材时的提示                                                   */
+/* ------------------------------------------------------------------ */
+.empty.miss { padding: 26px 16px; text-align: center; line-height: 1.9; }
+.empty.miss .miss-face { font-size: 15px; font-weight: 700; color: var(--brand); }
+.empty.miss .miss-sub { font-size: 13px; color: var(--sub); margin-top: 4px; }
+.empty.miss .miss-mail {
+  display: inline-block; margin-top: 10px; font-size: 13px;
+  color: var(--accent); text-decoration: none; word-break: break-all;
+  border-bottom: 1px dashed currentColor;
+}
+.empty.miss .miss-mail:hover { color: var(--brand); }

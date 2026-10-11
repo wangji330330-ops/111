@@ -133,8 +133,7 @@ function renderClock() {
 
 function gotoHerb(name) {
   switchTab('browse');
-  const s = document.getElementById('search');
-  if (s) s.value = name;
+  setSearch(name);            /* 同步 ✕ 清空按钮显隐，别直接赋值 */
   browseCat = '';
   document.querySelectorAll('#catChips .chip').forEach(c =>
     c.classList.toggle('active', c.dataset.cat === ''));

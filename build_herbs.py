@@ -398,6 +398,20 @@ def main():
             RAW = RAW + extra
             print("已合并扩充数据：%d 味（批次 %s）" % (len(extra), enabled))
 
+    # ---- 分类归并（把历史上不一致的分类名统一成教材叫法） ----
+    cat_merge = getattr(_add, "CATEGORY_MERGE", {}) if _add is not None else {}
+    if cat_merge:
+        merged = 0
+        new_raw = []
+        for rec in RAW:
+            rec = list(rec)
+            if rec[1] in cat_merge:
+                rec[1] = cat_merge[rec[1]]
+                merged += 1
+            new_raw.append(tuple(rec))
+        RAW = new_raw
+        print("已归并分类：%d 条记录（%d 组同名分类合并）" % (merged, len(cat_merge)))
+
     data = []
     seen = set()
     errs = []

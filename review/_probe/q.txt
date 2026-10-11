@@ -1,0 +1,5 @@
+﻿蚕沙_c09.jpg                               ad  {'med': 0.0104, 'peak': 0.0856, 'base': 0.0063, 'local': 13.67, 'flat': 0.264, 'sat': 38.4, 'subject': 0.736, 'green': 0.0}
+蜂蜜_c03.jpg                               ad  {'med': 0.0136, 'peak': 0.059, 'base': 0.0039, 'local': 15.29, 'flat': 0.003, 'sat': 27.7, 'subject': 0.997, 'green': 0.008}
+麦冬_c08.jpg                               ad  {'med': 0.0167, 'peak': 0.0522, 'base': 0.0063, 'local': 8.33, 'flat': 0.428, 'sat': 32.6, 'subject': 0.572, 'green': 0.02}
+黄芪_c07.jpg                               ad  {'med': 0.0, 'peak': 0.0605, 'base': 0.0, 'local': 605.43, 'flat': 0.002, 'sat': 70.3, 'subject': 0.998, 'green': 0.0}
+白术_c05.jpg                               text  {'med': 0.0814, 'peak': 0.1253, 'base': 0.0585, 'local': 2.14, 'flat': 0.292, 'sat': 53.2, 'subject': 0.708, 'green': 0.0}

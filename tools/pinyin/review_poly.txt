@@ -1,4 +1,4 @@
-共 192 条含多音字
+共 205 条含多音字
 
 桂枝	guì zhī	guì zhī
 	枝=zhī/qí 
@@ -384,3 +384,29 @@
 	叶=yè/xié 
 鸡冠花	jī guān huā	jī guān huā
 	冠=guān/guàn 
+千里光	qiān lǐ guāng	qiān lǐ guāng
+	里=lǐ/li 
+大血藤	dà xuè téng	dà xuè téng
+	大=dà/dài 血=xuè/xiě 
+地耳草	dì ěr cǎo	dì ěr cǎo
+	地=dì/de 
+徐长卿	xú cháng qīng	xú cháng qīng
+	长=cháng/zhǎng 
+油松节	yóu sōng jié	yóu sōng jié
+	节=jié/jiē 
+芜荑	wú yí	wú yí
+	荑=yí/tí 
+紫石英	zǐ shí yīng	zǐ shí yīng
+	石=shí/dàn 
+沙棘	shā jí	shā jí
+	沙=shā/shà 
+蛤蟆油	gé má yóu	há ma yóu
+	蛤=há/gé 蟆=ma/má/mò 
+大蒜	dà suàn	dà suàn
+	大=dà/dài 
+半枝莲	bàn zhī lián	bàn zhī lián
+	枝=zhī/qí 
+蛇莓	shé méi	shé méi
+	蛇=shé/yí 
+石见穿	shí jiàn chuān	shí jiàn chuān
+	石=shí/dàn 见=jiàn/xiàn 

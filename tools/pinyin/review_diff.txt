@@ -1,4 +1,4 @@
-共 22 条差异（读音差=声母韵母不同，声调差=仅声调不同）
+共 23 条差异（读音差=声母韵母不同，声调差=仅声调不同）
 
 薄荷	[声调]	pypinyin=bò hé	pinyin-pro=bò he
 葛根	[声调]	pypinyin=gé gēn	pinyin-pro=gě gēn
@@ -22,3 +22,4 @@
 罂粟壳	[读音]	pypinyin=yīng sù qiào	pinyin-pro=yīng sù ké
 刺猬皮	[声调]	pypinyin=cì wèi pí	pinyin-pro=cì wei pí
 参叶	[读音]	pypinyin=shēn yè	pinyin-pro=cān yè
+蛤蟆油	[读音]	pypinyin=gé má yóu	pinyin-pro=há ma yóu

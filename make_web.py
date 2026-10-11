@@ -24,12 +24,11 @@ DATA = os.path.join(WEB, "data")
 IMGSRC = os.path.join(HERE, "images")
 IMGDST = os.path.join(WEB, "images")
 
-VERSION = "1.5.0"
+VERSION = "1.5.1"
 
-NOTES = ("1.5.0：446 味中药全部加注拼音（带声调，逐字本调）；速查/详情/随机/看图猜药/错题本均显示拼音；"
-         "搜索支持拼音（mahuang / ma huang / má huáng 都能搜到）；"
-         "读音经双引擎比对 + 人工逐条审定 + 《中国药典》核对（白术 bái zhú、川芎 chuān xiōng、"
-         "玄参 xuán shēn、菟丝子 tù sī zǐ、桑螵蛸 sāng piāo xiāo、海蛤壳 hǎi gé qiào 等）")
+NOTES = ("1.5.1：题库 446→470 味（补入《中药学》第 5 版药材 + 新增抗癌药 6 味）；"
+         "分类归并 50→48，对齐教材；205 味重挑高清图（≥800×600，去广告、裁文字条）；"
+         "修复从看图猜药/随机中药/错题本跳到速查后搜索框「✕」不出现；搜不到药时给友好提示")
 MAX_SIDE = 420
 QUALITY = 70
 
