@@ -402,6 +402,15 @@ def main():
     seen = set()
     errs = []
     cats = collections.OrderedDict()
+
+    # ---- 拼音（审定表：pinyin_table.py）----
+    # 表由 tools/pinyin/generate.py 生成（双引擎比对 + 药典核对 + 人工裁定）。
+    # 新增药材后必须重跑该脚本，否则这里会报“缺拼音”。
+    try:
+        from pinyin_table import PY as PINYIN
+    except ImportError:
+        PINYIN = {}
+
     for rec in RAW:
         name, cat, nature, meridian, fx, usage, caution = rec
         if name in seen:
@@ -414,9 +423,15 @@ def main():
                 errs.append("功效项内部含标点: %s -> %s" % (name, item))
             if len(item) < 2:
                 errs.append("功效项过短: %s -> %s" % (name, item))
+        py = PINYIN.get(name)
+        if not py:
+            errs.append("缺拼音(请重跑 tools/pinyin/generate.py): " + name)
+        elif len(py.split()) != len(name):
+            errs.append("拼音音节数与字数不符: %s -> %s" % (name, py))
         cats.setdefault(cat, []).append(name)
         data.append({
-            "name": name, "cat": cat, "nature": nature, "meridian": meridian,
+            "name": name, "pinyin": py or "", "cat": cat,
+            "nature": nature, "meridian": meridian,
             "fx": list(fx), "usage": usage, "caution": caution,
         })
 

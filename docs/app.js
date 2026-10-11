@@ -6,7 +6,7 @@
 'use strict';
 
 const APP = {
-  version: '1.1.0',
+  version: '1.5.0',
   herbs: [],
   categories: [],
   synonyms: [],
@@ -37,6 +37,19 @@ function shuffle(a) {
   return a;
 }
 const pick = a => a[Math.floor(Math.random() * a.length)];
+
+/* 拼音检索：把带声调的拼音变成纯字母，输入 mahuang / ma huang / má huáng 都能搜到 */
+const PY_TONE = {
+  'ā': 'a', 'á': 'a', 'ǎ': 'a', 'à': 'a',
+  'ē': 'e', 'é': 'e', 'ě': 'e', 'è': 'e',
+  'ī': 'i', 'í': 'i', 'ǐ': 'i', 'ì': 'i',
+  'ō': 'o', 'ó': 'o', 'ǒ': 'o', 'ò': 'o',
+  'ū': 'u', 'ú': 'u', 'ǔ': 'u', 'ù': 'u',
+  'ǖ': 'v', 'ǘ': 'v', 'ǚ': 'v', 'ǜ': 'v', 'ü': 'v'
+};
+const pyPlain = s => String(s == null ? '' : s).replace(/[āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜü]/g,
+  c => PY_TONE[c] || c).toLowerCase();
+const pyKey = s => pyPlain(s).replace(/[\s'’·-]/g, '');
 
 /* 答案归一化：去标点与虚词 */
 const NOISE = /[能可有善主且以之为者也的和与及或、，,。；;：: 　（）()“”"'！!？?·\-—～~\/\\＋+]/g;
@@ -590,12 +603,14 @@ function filteredHerbs() {
   const key = $('#search').value.trim();
   const onlyWrong = $('#onlyWrong').checked;
   const wrong = LS.get('wrong', {});
+  const k = key.toLowerCase();
+  const kp = pyKey(key);
   return APP.herbs.filter(h => {
     if (browseCat && h.c !== browseCat) return false;
     if (onlyWrong && !wrong[h.n]) return false;
     if (key) {
-      const blob = h.n + h.x + h.m + h.f.join('') + h.c;
-      if (blob.indexOf(key) < 0) return false;
+      const blob = h.n + h.x + h.m + h.f.join('') + h.c + (h.p || '');
+      if (blob.toLowerCase().indexOf(k) < 0 && (!kp || pyKey(blob).indexOf(kp) < 0)) return false;
     }
     return true;
   });
@@ -608,6 +623,7 @@ function renderHerbList() {
   box.innerHTML = list.map(h =>
     `<div class="row" data-name="${esc(h.n)}">
        <span class="row-name">${esc(h.n)}</span>
+       ${h.p ? `<span class="row-py">${esc(h.p)}</span>` : ''}
        <span class="row-cat">${esc(h.c.split('·')[0])}</span>
      </div>`).join('') || '<div class="empty">没有匹配的药物</div>';
   // 点击（含触摸）选中药物 —— 修复：之前速查列表漏绑事件，点不动
@@ -627,6 +643,7 @@ function showHerb(name) {
   const wrong = LS.get('wrong', {});
   $('#detail').innerHTML = `
     <h2>${esc(h.n)}</h2>
+    ${h.p ? `<div class="py-name">${esc(h.p)}</div>` : ''}
     <dl>
       <dt>分类</dt><dd>${esc(h.c)}</dd>
       <dt>性味</dt><dd>${esc(h.x)}</dd>
@@ -1108,6 +1125,7 @@ function renderWrong() {
   $('#wrongList').innerHTML = rows.map(r =>
     `<div class="row" data-name="${esc(r.n)}">
       <span class="row-name">${esc(r.n)}</span>
+      ${r.h.p ? `<span class="row-py">${esc(r.h.p)}</span>` : ''}
       <span class="row-cat">${esc(r.h.c.split('·')[0])}</span>
       <span class="row-cnt">${r.c} 次</span></div>`).join('');
   $('#wrongList').onclick = e => {
@@ -1118,6 +1136,7 @@ function renderWrong() {
     const h = herbByName(name);
     $('#wrongDetail').innerHTML = `
       <h2>${esc(h.n)}</h2>
+      ${h.p ? `<div class="py-name">${esc(h.p)}</div>` : ''}
       <div class="warnbox">做错 ${wrong[name]} 次</div>
       <button class="btn small" id="goBrowse">在速查中查看</button>
       <dl><dt>分类</dt><dd>${esc(h.c)}</dd><dt>性味</dt><dd>${esc(h.x)}</dd>

@@ -4,7 +4,7 @@
 
 - **网页版**（推荐，手机也能用）：[`docs/index.html`](docs/index.html)
 - **桌面版**：`发布\中药学复习系统.exe`（Windows 单文件，双击即用，无需安装）
-- **题库**：294 味中药 · 43 个分类 · 821 条功效 · 573 张实物图片
+- **题库**：446 味中药 · 50 个分类 · 1206 条功效 · 886 张实物图片 · **全部带汉语拼音**
 - **许可**：[MIT](LICENSE)（可自由使用、修改、再发布）
 
 ---
@@ -92,8 +92,8 @@ powershell -ExecutionPolicy Bypass -File build.ps1
 
 | 功能 | 说明 |
 | --- | --- |
-| 中药速查 | 搜索药名/功效/性味/归经，分类筛选；右侧显示性味、归经、功效、用法、注意 + 实物图片，**点击图片放大**（可**隐藏**不合适的图，随时**恢复**） |
-| 随机中药 | 随机抽一味，显示图片与完整药性；「🔁 换一味」刷新 |
+| 中药速查 | 搜索药名/**拼音**/功效/性味/归经（`mahuang`、`ma huang`、`má huáng` 都能搜到「麻黄」），分类筛选；右侧显示**拼音**、性味、归经、功效、用法、注意 + 实物图片，**点击图片放大**（可**隐藏**不合适的图，随时**恢复**） |
+| 随机中药 | 随机抽一味，显示**拼音**、图片与完整药性；「🔁 换一味」刷新 |
 | 开始测试 | **固定 100 分制**：单选 3 分、多选 5 分、填空 3 分、判断 2 分；只调题量，合计必须正好 100 分才能开考；限时 0~300 分钟；支持随机出题、错题强化、练习模式 |
 | 看图猜药 | 看图片四选一识药；**答对答错都显示答案**（性味/归经/功效/用法/注意）；同分类干扰项；键盘 `1~4` 选答案、`Enter` 下一味；可「先遮住图片」；带统计（正确率、连对） |
 | 错题本 | 按错误次数排序，右侧看该药资料；支持导出文本、一键错题强化 |
@@ -117,14 +117,19 @@ powershell -ExecutionPolicy Bypass -File build.ps1
 │   ├─ style.css / style2.css
 │   ├─ version.json        版本与更新信息（改这里即可推送更新）
 │   ├─ data/               题库、同义词、图片索引
-│   ├─ images/             579 张中药图片
+│   ├─ images/             886 张中药图片
 │   └─ 离线版.html          单文件离线版（双击即用，已在 docs/ 内）
 ├─ src/                    桌面版 C# 源码
 ├─ tools/                  图片打包/抓取/审查脚本
 │   ├─ webtest.js          网页版出题与判分自测
-│   └─ featuretest.js      看图猜药 + 图片隐藏/恢复自测
+│   ├─ featuretest.js      看图猜药 + 图片隐藏/恢复自测
+│   ├─ changelogtest.js    更新日志自测
+│   ├─ cattest.js          分类筛选自测
+│   ├─ pinyintest.js       拼音自测（读音 + 渲染 + 搜索）
+│   └─ pinyin/             拼音读音审定流水线（双引擎比对 + 药典核对）
 ├─ images/                 原始图片库（桌面版打包用）
 ├─ build_herbs.py          题库数据源（每味药一行，改这里可增改药物）
+├─ pinyin_table.py         审定后的药名→拼音表（自动生成）
 ├─ build.ps1               桌面版一键编译
 ├─ make_web.py             生成网页版数据
 ├─ make_singlefile.py      生成单文件离线版（自动内联全部 CSS/JS）
@@ -138,6 +143,9 @@ powershell -ExecutionPolicy Bypass -File build.ps1
 python make_web.py            # 生成网页版数据
 node tools/webtest.js         # 网页版：出题与判分自测（应输出 WEB SELFTEST PASS）
 node tools/featuretest.js     # 看图猜药 + 图片隐藏/恢复自测（应输出 FEATURE SELFTEST PASS）
+node tools/changelogtest.js   # 更新日志自测（CHANGELOG SELFTEST PASS）
+node tools/cattest.js         # 分类筛选自测（CATEGORY SELFTEST PASS）
+node tools/pinyintest.js      # 拼音自测（PINYIN SELFTEST PASS）
 powershell -File build.ps1    # 桌面版编译 + 自测（应输出 SELFTEST PASS）
 python make_singlefile.py     # 生成单文件离线版（会自动内联全部 CSS/JS）
 ```

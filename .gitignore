@@ -16,6 +16,16 @@ patch_*.py
 # ---- 原始图片库（19 MB，仅根目录那份；网页版用的 docs/images 必须保留） ----
 /images/
 
+# ---- 拼音审定流水线的中间产物（可重跑生成；审校结果已冻结进 pinyin_table.py） ----
+/_pytmp/
+/tools/pinyin/py_pypinyin.json
+/tools/pinyin/py_pinyinpro.json
+/tools/pinyin/py_pinyinpro_alt.json
+/tools/pinyin/_ref/
+/tools/pinyin/_*.txt
+/tools/pinyin/_*.log
+/tools/pinyin/zdic_words.txt
+
 # ---- 编辑器/系统文件 ----
 .vscode/
 .idea/

@@ -302,7 +302,7 @@ namespace TcmReview
         private HerbData _data;
         private Dictionary<string, int> _map = new Dictionary<string, int>();
         private ListBox _list;
-        private Label _nameLbl, _countLbl, _fxLbl, _usageLbl, _cautionLbl, _emptyLbl;
+        private Label _nameLbl, _pyLbl, _countLbl, _fxLbl, _usageLbl, _cautionLbl, _emptyLbl;
         private Panel _detailCard;
         private Label _summary;
         private int _current = -1;
@@ -421,6 +421,15 @@ namespace TcmReview
             _nameLbl.Left = 22; _nameLbl.Top = 18;
             _detailCard.Controls.Add(_nameLbl);
 
+            // 拼音：跟在药名右侧，底部对齐（药名是 AutoSize，位置在 ShowDetail 里算）
+            _pyLbl = new Label();
+            _pyLbl.Font = Ui.F(12.5f);
+            _pyLbl.ForeColor = Ui.Sub;
+            _pyLbl.AutoSize = true;
+            _pyLbl.Left = 22; _pyLbl.Top = 40;
+            _detailCard.Controls.Add(_pyLbl);
+            _pyLbl.BringToFront();
+
             _countLbl = new Label();
             _countLbl.Font = Ui.FB(12f);
             _countLbl.ForeColor = Color.White;
@@ -495,13 +504,27 @@ namespace TcmReview
             bool sel = (e.State & DrawItemState.Selected) == DrawItemState.Selected;
             Color back = sel ? Ui.BrandLight : Ui.Card;
             using (SolidBrush b = new SolidBrush(back)) e.Graphics.FillRectangle(b, e.Bounds);
+            // 药名后面跟拼音（小字灰色），再跟分类
+            float nx;
             using (Font f = Ui.FB(11.5f))
             using (SolidBrush fb = new SolidBrush(sel ? Ui.Brand : Ui.Text))
+            {
                 e.Graphics.DrawString(row.Herb.Name, f, fb, e.Bounds.Left + 10, e.Bounds.Top + 4);
+                nx = e.Bounds.Left + 10 + e.Graphics.MeasureString(row.Herb.Name, f).Width + 8;
+            }
+            if (row.Herb.Pinyin.Length > 0)
+            {
+                using (Font fp = Ui.F(9f))
+                using (SolidBrush bp = new SolidBrush(Ui.Sub))
+                {
+                    e.Graphics.DrawString(row.Herb.Pinyin, fp, bp, nx, e.Bounds.Top + 7);
+                    nx += e.Graphics.MeasureString(row.Herb.Pinyin, fp).Width + 10;
+                }
+            }
             string cat = row.Herb.CatMain;
             using (Font f2 = Ui.F(9.5f))
             using (SolidBrush fb2 = new SolidBrush(Ui.Sub))
-                e.Graphics.DrawString(cat, f2, fb2, e.Bounds.Left + 96, e.Bounds.Top + 7);
+                e.Graphics.DrawString(cat, f2, fb2, nx, e.Bounds.Top + 7);
             string cnt = row.Count + " 次";
             using (Font f3 = Ui.FB(10.5f))
             using (SolidBrush fb3 = new SolidBrush(row.Count >= 3 ? Ui.Bad : Ui.Warn))
@@ -563,6 +586,9 @@ namespace TcmReview
             _current = _list.SelectedIndex;
             Herb h = row.Herb;
             _nameLbl.Text = h.Name;
+            _pyLbl.Text = h.Pinyin;
+            _pyLbl.Left = _nameLbl.Left + _nameLbl.Width + 12;
+            _pyLbl.Top = _nameLbl.Top + Math.Max(0, _nameLbl.Height - _pyLbl.Height - 3);
             _countLbl.Text = "做错 " + row.Count + " 次";
             _fxLbl.Text = "【分类】" + h.Cat + "\n【性味】" + h.Nature + "\n【归经】" + h.Meridian +
                 "\n【功效】" + h.FxText;

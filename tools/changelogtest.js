@@ -38,8 +38,10 @@ L.CHANGELOG.forEach(r => {
   if (!/^\d+\.\d+(\.\d+)?$/.test(r.v)) mark('版本号格式异常: ' + r.v);
 });
 if (!seen.has('1.0.0')) mark('缺少 1.0.0 首发版本');
-if (!seen.has('1.4.1')) mark('缺少当前版本 1.4.1');
-console.log('版本条目: %d 条 -> %s', L.CHANGELOG.length, L.CHANGELOG.map(r=>'v'+r.v).join(' > '));
+// 当前版本：以 docs/version.json 为准（避免每次发版都要改测试）
+const CUR = JSON.parse(fs.readFileSync(path.join(web, 'version.json'), 'utf8')).version;
+if (!seen.has(CUR)) mark('更新日志缺少当前版本 ' + CUR);
+console.log('版本条目: %d 条 -> %s（当前 %s）', L.CHANGELOG.length, L.CHANGELOG.map(r=>'v'+r.v).join(' > '), CUR);
 
 // 2) 版本号递增规则校验（末位 +0.01 / 进位 +0.1）
 function toNum(v){ const p=v.split('.').map(Number); return (p[0]*100 + (p[1]||0)) * 100 + (p[2]||0); }
@@ -53,7 +55,7 @@ console.log('版本递增校验: %s', bad===0 ? '通过' : '有问题');
 // 3) 渲染
 L.renderChangelog('clBody');
 const html = nodes['clBody'].innerHTML;
-if (!html.includes('v1.4.1')) mark('渲染结果缺当前版本');
+if (!html.includes('v' + CUR)) mark('渲染结果缺当前版本 ' + CUR);
 if (!html.includes('cl-item')) mark('渲染结果缺条目结构');
 if ((html.match(/cl-item/g)||[]).length < L.CHANGELOG.length) mark('渲染条目数不足');
 console.log('渲染 HTML: %d 字节，含条目 %d 个', html.length, (html.match(/cl-item/g)||[]).length);

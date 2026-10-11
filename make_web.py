@@ -24,10 +24,12 @@ DATA = os.path.join(WEB, "data")
 IMGSRC = os.path.join(HERE, "images")
 IMGDST = os.path.join(WEB, "images")
 
-VERSION = "1.4.1"
+VERSION = "1.5.0"
 
-NOTES = ("1.4.1：修复分类筛选两个 bug（全部分类常亮、子类行停留在上一大类）；"
-         "搜索框加一键清空；分类改为大类+子类折叠；新增更新日志")
+NOTES = ("1.5.0：446 味中药全部加注拼音（带声调，逐字本调）；速查/详情/随机/看图猜药/错题本均显示拼音；"
+         "搜索支持拼音（mahuang / ma huang / má huáng 都能搜到）；"
+         "读音经双引擎比对 + 人工逐条审定 + 《中国药典》核对（白术 bái zhú、川芎 chuān xiōng、"
+         "玄参 xuán shēn、菟丝子 tù sī zǐ、桑螵蛸 sāng piāo xiāo、海蛤壳 hǎi gé qiào 等）")
 MAX_SIDE = 420
 QUALITY = 70
 
@@ -94,8 +96,8 @@ def main():
         if files:
             imgmap[name] = files
         out_herbs.append({
-            "n": name, "c": h["cat"], "x": h["nature"], "m": h["meridian"],
-            "f": h["fx"], "u": h["usage"], "k": h["caution"],
+            "n": name, "p": h.get("pinyin", ""), "c": h["cat"], "x": h["nature"],
+            "m": h["meridian"], "f": h["fx"], "u": h["usage"], "k": h["caution"],
         })
 
     save_json(os.path.join(DATA, "herbs.json"), {

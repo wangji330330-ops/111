@@ -1,0 +1,24 @@
+共 22 条差异（读音差=声母韵母不同，声调差=仅声调不同）
+
+薄荷	[声调]	pypinyin=bò hé	pinyin-pro=bò he
+葛根	[声调]	pypinyin=gé gēn	pinyin-pro=gě gēn
+黄柏	[读音]	pypinyin=huáng bò	pinyin-pro=huáng bǎi
+苦参	[读音]	pypinyin=kǔ shēn	pinyin-pro=kǔ cān
+连翘	[声调]	pypinyin=lián qiáo	pinyin-pro=lián qiào
+射干	[读音]	pypinyin=yè gān	pinyin-pro=shè gàn
+玄参	[读音]	pypinyin=xuán shēn	pinyin-pro=xuán cān
+神曲	[声调]	pypinyin=shén qū	pinyin-pro=shén qǔ
+槟榔	[读音]	pypinyin=bīng láng	pinyin-pro=bīn láng
+莪术	[读音]	pypinyin=é zhú	pinyin-pro=é shù
+太子参	[读音]	pypinyin=tài zǐ shēn	pinyin-pro=tài zǐ cān
+菟丝子	[声调]	pypinyin=tù sī zǐ	pinyin-pro=tú sī zǐ
+阿胶	[读音]	pypinyin=ē jiāo	pinyin-pro=ā jiāo
+桑螵蛸	[读音]	pypinyin=sāng piāo xiāo	pinyin-pro=sāng piāo shāo
+海螵蛸	[读音]	pypinyin=hǎi piāo xiāo	pinyin-pro=hǎi piāo shāo
+重楼	[读音]	pypinyin=chóng lóu	pinyin-pro=zhòng lóu
+拳参	[读音]	pypinyin=quán shēn	pinyin-pro=quán cān
+枳壳	[读音]	pypinyin=zhǐ qiào	pinyin-pro=zhǐ ké
+海蛤壳	[读音]	pypinyin=hǎi gé qiào	pinyin-pro=hǎi há ké
+罂粟壳	[读音]	pypinyin=yīng sù qiào	pinyin-pro=yīng sù ké
+刺猬皮	[声调]	pypinyin=cì wèi pí	pinyin-pro=cì wei pí
+参叶	[读音]	pypinyin=shēn yè	pinyin-pro=cān yè

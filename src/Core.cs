@@ -19,6 +19,7 @@ namespace TcmReview
     public class Herb
     {
         public string Name = "";
+        public string Pinyin = "";     // 拼音（审定表，见 pinyin_table.py）
         public string Cat = "";
         public string Nature = "";     // 性味
         public string Meridian = "";   // 归经
@@ -55,6 +56,12 @@ namespace TcmReview
             return Name;
         }
 
+        /// <summary>速查列表显示用：药名 + 拼音</summary>
+        public string ListText
+        {
+            get { return Pinyin.Length > 0 ? Name + "   " + Pinyin : Name; }
+        }
+
         public bool HasFx(string item)
         {
             foreach (string s in Fx)
@@ -81,7 +88,7 @@ namespace TcmReview
         public string FullText()
         {
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine("【药名】" + Name);
+            sb.AppendLine("【药名】" + Name + (Pinyin.Length > 0 ? "（" + Pinyin + "）" : ""));
             sb.AppendLine("【分类】" + Cat);
             sb.AppendLine("【性味】" + Nature);
             sb.AppendLine("【归经】" + Meridian);
@@ -89,6 +96,34 @@ namespace TcmReview
             sb.AppendLine("【用法用量】" + Usage);
             sb.AppendLine("【使用注意】" + Caution);
             return sb.ToString();
+        }
+    }
+
+    // ------------------------------------------------------------------
+    //  拼音检索工具
+    //  把带声调的拼音转成纯字母，便于用户直接敲 mahuang / ma huang 搜索
+    // ------------------------------------------------------------------
+    public static class SearchText
+    {
+        public static string PlainPinyin(string s)
+        {
+            if (string.IsNullOrEmpty(s)) return "";
+            char[] buf = new char[s.Length];
+            for (int i = 0; i < s.Length; i++)
+            {
+                char c = s[i];
+                switch (c)
+                {
+                    case 'ā': case 'á': case 'ǎ': case 'à': c = 'a'; break;
+                    case 'ē': case 'é': case 'ě': case 'è': c = 'e'; break;
+                    case 'ī': case 'í': case 'ǐ': case 'ì': c = 'i'; break;
+                    case 'ō': case 'ó': case 'ǒ': case 'ò': c = 'o'; break;
+                    case 'ū': case 'ú': case 'ǔ': case 'ù': c = 'u'; break;
+                    case 'ǖ': case 'ǘ': case 'ǚ': case 'ǜ': case 'ü': c = 'v'; break;
+                }
+                buf[i] = c;
+            }
+            return new string(buf);
         }
     }
 
@@ -200,6 +235,7 @@ namespace TcmReview
                         if (d == null) continue;
                         Herb h = new Herb();
                         h.Name = Str(d, "name");
+                        h.Pinyin = Str(d, "pinyin");
                         h.Cat = Str(d, "cat");
                         h.Nature = Str(d, "nature");
                         h.Meridian = Str(d, "meridian");
@@ -1034,7 +1070,7 @@ namespace TcmReview
     // ------------------------------------------------------------------
     public static class UpdateChecker
     {
-        public const string CurrentVersion = "1.4.1";
+        public const string CurrentVersion = "1.5.0";
 
         /// <summary>可在此写死你的更新地址（版本文件），留空则用命令行 --update-url 指定</summary>
         public static string Url = "";

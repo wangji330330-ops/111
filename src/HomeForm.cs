@@ -1,4 +1,4 @@
-﻿// =====================================================================
+// =====================================================================
 //  中药学复习系统 —— 首页界面
 //  文件: HomeForm.cs
 //  页面：中药速查 / 开始测试 / 错题本 / 成绩记录 / 设置
@@ -248,9 +248,9 @@ namespace TcmReview
             _herbList.Dock = DockStyle.Fill;
             _herbList.BorderStyle = BorderStyle.FixedSingle;
             _herbList.IntegralHeight = false;
-            // 关键：让列表显示药名而不是 TcmReview.Herb
+            // 关键：让列表显示药名而不是 TcmReview.Herb；带上拼音更好认
             Ui.SetDoubleBuffered(_herbList);
-            _herbList.DisplayMember = "Name";
+            _herbList.DisplayMember = "ListText";
             _herbList.ValueMember = "Name";
             _herbList.SelectedIndexChanged += delegate { ShowHerb(); };
             card.Controls.Add(_herbList);
@@ -327,8 +327,17 @@ namespace TcmReview
                 if (onlyWrong && !_wrongMap.ContainsKey(h.Name)) continue;
                 if (key.Length > 0)
                 {
-                    string blob = h.Name + h.Nature + h.Meridian + h.FxText + h.Cat;
-                    if (blob.IndexOf(key, StringComparison.OrdinalIgnoreCase) < 0) continue;
+                    string blob = h.Name + h.Pinyin + SearchText.PlainPinyin(h.Pinyin)
+                        + h.Nature + h.Meridian + h.FxText + h.Cat;
+                    string k = key;
+                    if (blob.IndexOf(k, StringComparison.OrdinalIgnoreCase) < 0)
+                    {
+                        // 支持拼音搜索：输入 mahuang / ma huang / má huáng 都能命中
+                        string kp = SearchText.PlainPinyin(key).Replace(" ", "");
+                        if (kp.Length == 0 ||
+                            SearchText.PlainPinyin(blob).Replace(" ", "").IndexOf(kp, StringComparison.OrdinalIgnoreCase) < 0)
+                            continue;
+                    }
                 }
                 _herbList.Items.Add(h);
                 n++;
@@ -358,6 +367,7 @@ namespace TcmReview
             _detail.Clear();
             Append("【药名】", Ui.Brand);
             Append(h.Name + "\n", Ui.Text, true);
+            if (h.Pinyin.Length > 0) Append(h.Pinyin + "\n", Ui.Accent, true);
             Append("【分类】", Ui.Brand);
             Append(h.Cat + "\n", Ui.Text);
             Append("【性味】", Ui.Brand);

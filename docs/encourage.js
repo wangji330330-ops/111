@@ -157,6 +157,7 @@ function renderGuess() {
           </div>
           <div class="g-answer">
             <div class="g-ans-name">正确答案：<b>${esc(h.n)}</b>
+              ${h.p ? `<span class="g-ans-py">${esc(h.p)}</span>` : ''}
               <span class="g-ans-cat">${esc(h.c)}</span></div>
             <dl class="g-dl">
               <dt>性味</dt><dd>${esc(h.x)}</dd>

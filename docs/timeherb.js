@@ -187,6 +187,7 @@ function renderRandomHerb() {
       </div>
       <div class="rand-right">
         <h2 class="rand-name">${esc(h.n)}</h2>
+        ${h.p ? `<div class="rand-py">${esc(h.p)}</div>` : ''}
         <dl>
           <dt>分类</dt><dd>${esc(h.c)}</dd>
           <dt>性味</dt><dd>${esc(h.x)}</dd>
