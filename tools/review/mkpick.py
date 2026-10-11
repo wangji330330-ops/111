@@ -22,6 +22,14 @@ HD = os.path.join(ROOT, "review", "hd")
 INDEX = os.path.join(HD, "index.json")
 NAMES_FILE = os.path.join(ROOT, "review", "refetch_names.txt")
 OUT = os.path.join(ROOT, "review", "pick.html")
+# 同一份页面要放到两个地方，图片相对路径必须各自算：
+#   review/pick.html  -> hd/xxx.jpg
+#   项目根/挑图.html   -> review/hd/xxx.jpg
+# （之前只是把文件复制过去，路径没跟着改，结果打开全是"未找到文件"）
+OUTS = [
+    (os.path.join(ROOT, "review", "pick.html"), "hd"),
+    (os.path.join(ROOT, "挑图.html"), "review/hd"),
+]
 
 HERBS = json.load(io.open(os.path.join(ROOT, "herbs.json"), encoding="utf-8"))["herbs"]
 PY = {h["name"]: h.get("pinyin", "") for h in HERBS}
@@ -235,9 +243,9 @@ def main():
             trim = '<span class="trim">已裁文字条</span>' if m.get("trimmed") else ''
             cells.append(
                 '<figure data-herb="%s" data-col="%d" onclick="pick(this)">'
-                '<a class="zoom" href="hd/%s" target="_blank" '
+                '<a class="zoom" href="@@IMG@@/%s" target="_blank" '
                 'onclick="event.stopPropagation()" title="在新标签看原图">🔍看大图</a>'
-                '<img src="hd/%s" alt="%s 第%d列" loading="lazy">%s'
+                '<img src="@@IMG@@/%s" alt="%s 第%d列" loading="lazy">%s'
                 '<figcaption><b>第 %d 列</b> · %s<br>'
                 '<span class="qb %s" title="文字行占比 %.2f">%s</span> '
                 '<span class="site">%s</span></figcaption>'
@@ -282,12 +290,14 @@ def main():
 <script>@@JS@@</script>
 </body></html>"""
 
-    html = (html.replace("@@CSS@@", CSS).replace("@@ROWS@@", "".join(rows))
+    body = (html.replace("@@CSS@@", CSS).replace("@@ROWS@@", "".join(rows))
             .replace("@@JS@@", JS).replace("@@N@@", str(len(names)))
             .replace("@@M@@", str(total_imgs)))
-    io.open(OUT, "w", encoding="utf-8").write(html)
-    print("生成 %s（%d 味 / %d 张候选，%.1f MB）" %
-          (OUT, len(names), total_imgs, os.path.getsize(OUT) / 1048576.0))
+    for out, prefix in OUTS:
+        page = body.replace("@@IMG@@", prefix)
+        io.open(out, "w", encoding="utf-8").write(page)
+        print("生成 %s（%d 味 / %d 张候选，%.1f MB，图片前缀 %s/）" %
+              (out, len(names), total_imgs, os.path.getsize(out) / 1048576.0, prefix))
 
 
 if __name__ == "__main__":
