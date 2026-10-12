@@ -1,4 +1,4 @@
-﻿// 发布后校验：把线上文件与本地文件做（行尾归一化后的）逐字节比对，并抽查关键内容。
+// 发布后校验：把线上文件与本地文件做（行尾归一化后的）逐字节比对，并抽查关键内容。
 // 用法: node tools/pinyin/livecheck.mjs
 import fs from 'node:fs';
 import path from 'node:path';
@@ -36,7 +36,8 @@ const checks = [
   ['data/herbs.json', '"p": "Má Huáng"'],
   ['app.js', 'pyKey'],
   ['style2.css', '.row-py'],
-  ['index.html', '搜索药名 / 拼音']
+  ['index.html', '搜索药名 / 别名 / 拼音'],
+  ['data/herbs.json', '"a": "川军、川锦纹"']
 ];
 for (const [f, needle] of checks) {
   const r = await fetch(BASE + f + '?_=' + Date.now(), { cache: 'no-store' });
