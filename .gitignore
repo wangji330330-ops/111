@@ -16,21 +16,14 @@ patch_*.py
 # ---- 原始图片库（19 MB，仅根目录那份；网页版用的 docs/images 必须保留） ----
 /images/
 
-# ---- 挑图用的候选图（几百 MB，只是中间产物，绝不能进仓库）----
+# ---- 挑图用的中间产物（几百 MB，绝不能进仓库）----
 # 教训：review/hd 曾被 git add -A 一次性提交，仓库瞬间涨到 800 MB，
-# 之后的每次 push 都变得又慢又容易断。候选图一律忽略，只提交脚本与选择结果。
-/review/hd/
-/review/hd2/
-/review/c10/
-/review/c360/
-/review/c360fix2/
-/review/cand/
-/review/numbered/
-/review/_chk/
-/review/_probe/
-/review/_book/
-/review/fetch_*.log
-/review/*.png
+# 之后每次 push 都又慢又容易断。review/ 下只留「清单」和「挑选结果」这类文本。
+/review/**
+!/review/refetch_names.txt
+!/review/refetch_names2.txt
+!/review/picks_user.txt
+!/review/picks_report.txt
 
 # ---- 拼音审定流水线的中间产物（可重跑生成；审校结果已冻结进 pinyin_table.py） ----
 /_pytmp/
