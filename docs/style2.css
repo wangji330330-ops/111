@@ -461,3 +461,9 @@ main { padding-bottom: 26px; }
   font-size: 11.5px; line-height: 1.85; color: #7b8a84;
 }
 .src-legend b { color: var(--brand); }
+
+/* 搜索框提示文字小一号（正文仍是 14px，只有占位符缩小，避免挤成一坨） */
+#search::placeholder { font-size: 12.5px; color: #9aa8a2; }
+#search::-webkit-input-placeholder { font-size: 12.5px; color: #9aa8a2; }
+#search::-moz-placeholder { font-size: 12.5px; color: #9aa8a2; opacity: 1; }
+@media (max-width: 560px) { #search::placeholder { font-size: 11.5px; } }
