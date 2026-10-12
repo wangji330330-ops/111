@@ -10,8 +10,13 @@ import re
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-PAGES = [os.path.join(ROOT, "挑图.html"),
-         os.path.join(ROOT, "review", "pick.html")]
+# 默认检查第一轮挑图页；第二轮加 --suffix=2
+_SUF = ""
+for _a in sys.argv[1:]:
+    if _a.startswith("--suffix="):
+        _SUF = _a.split("=", 1)[1]
+PAGES = [os.path.join(ROOT, "挑图%s.html" % _SUF),
+         os.path.join(ROOT, "review", "pick%s.html" % _SUF)]
 
 
 def main():

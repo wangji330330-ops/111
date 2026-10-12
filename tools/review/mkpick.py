@@ -21,15 +21,26 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 HD = os.path.join(ROOT, "review", "hd")
 INDEX = os.path.join(HD, "index.json")
 NAMES_FILE = os.path.join(ROOT, "review", "refetch_names.txt")
-OUT = os.path.join(ROOT, "review", "pick.html")
-# 同一份页面要放到两个地方，图片相对路径必须各自算：
-#   review/pick.html  -> hd/xxx.jpg
-#   项目根/挑图.html   -> review/hd/xxx.jpg
-# （之前只是把文件复制过去，路径没跟着改，结果打开全是"未找到文件"）
+# 输出：同一份页面要放两个地方，图片相对路径必须各自算
+#   review/pick.html -> hd/xxx.jpg ；项目根/挑图.html -> review/hd/xxx.jpg
+# （之前只是把文件复制过去、路径没跟着改，打开全是"未找到文件"）
 OUTS = [
     (os.path.join(ROOT, "review", "pick.html"), "hd"),
     (os.path.join(ROOT, "挑图.html"), "review/hd"),
 ]
+
+
+def use_dir(dirname, names_file, suffix=""):
+    """切到第二轮抓图的目录/清单（--dir=hd2 --names=refetch_names2.txt --suffix=2）"""
+    global HD, INDEX, NAMES_FILE, OUTS
+    HD = os.path.join(ROOT, "review", dirname)
+    INDEX = os.path.join(HD, "index.json")
+    if names_file:
+        NAMES_FILE = os.path.join(ROOT, "review", names_file)
+    OUTS = [
+        (os.path.join(ROOT, "review", "pick%s.html" % suffix), "%s" % dirname),
+        (os.path.join(ROOT, "挑图%s.html" % suffix), "review/%s" % dirname),
+    ]
 
 HERBS = json.load(io.open(os.path.join(ROOT, "herbs.json"), encoding="utf-8"))["herbs"]
 PY = {h["name"]: h.get("pinyin", "") for h in HERBS}
@@ -218,6 +229,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 def main():
+    suffix = ""
+    for a in sys.argv[1:]:
+        if a.startswith("--dir="):
+            d = a.split("=", 1)[1]
+            nf = None
+            sf = ""
+            for b in sys.argv[1:]:
+                if b.startswith("--names="):
+                    nf = b.split("=", 1)[1]
+                if b.startswith("--suffix="):
+                    sf = b.split("=", 1)[1]
+            use_dir(d, nf, sf)
+            suffix = sf
     idx = json.load(io.open(INDEX, encoding="utf-8")) if os.path.exists(INDEX) else {}
     qc = rank(idx) if "--rank" in sys.argv else (
         json.load(io.open(os.path.join(HD, "qc.json"), encoding="utf-8"))

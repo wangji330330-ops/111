@@ -543,6 +543,18 @@ def log(msg):
 
 
 def main():
+    global OUT, INDEX, WANT, NAMES_FILE, LOG
+    # 第二轮抓图用：换输出目录 / 换清单 / 换每味目标张数
+    for a in sys.argv[1:]:
+        if a.startswith("--dir="):
+            OUT = os.path.join(ROOT, "review", a.split("=", 1)[1])
+            INDEX = os.path.join(OUT, "index.json")
+        elif a.startswith("--names="):
+            NAMES_FILE = os.path.join(ROOT, "review", a.split("=", 1)[1])
+        elif a.startswith("--want="):
+            WANT = int(a.split("=", 1)[1])
+        elif a.startswith("--log="):
+            LOG = os.path.join(ROOT, "review", a.split("=", 1)[1])
     names = load_names()
     min_long = MIN_LONG
     for a in sys.argv[1:]:
