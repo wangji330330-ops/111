@@ -402,3 +402,47 @@ main { padding-bottom: 26px; }
   border-bottom: 1px dashed currentColor;
 }
 .empty.miss .miss-mail:hover { color: var(--brand); }
+
+/* ------------------------------------------------------------------ */
+/* 测一下：子页签 + 题型模式                                            */
+/* ------------------------------------------------------------------ */
+.subtabs {
+  display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 14px;
+  padding: 6px; background: #eef3f0; border-radius: 999px; width: fit-content;
+}
+.subtab {
+  font: inherit; font-size: 13.5px; cursor: pointer;
+  border: 0; background: transparent; color: var(--sub);
+  padding: 6px 18px; border-radius: 999px; white-space: nowrap;
+}
+.subtab:hover { color: var(--brand); background: rgba(255, 255, 255, .7); }
+.subtab.active {
+  background: #fff; color: var(--brand); font-weight: 700;
+  box-shadow: 0 1px 4px rgba(20, 40, 32, .12);
+}
+.subpage { display: none; }
+.subpage.active { display: block; }
+
+.qmodes { display: flex; gap: 8px; flex-wrap: wrap; margin: 4px 0 2px; }
+.qm {
+  font: inherit; font-size: 13px; cursor: pointer;
+  border: 1px solid var(--line); background: #fff; color: #46534d;
+  padding: 5px 15px; border-radius: 999px;
+}
+.qm:hover { border-color: var(--brand); color: var(--brand); }
+.qm.active {
+  background: var(--brand); border-color: var(--brand); color: #fff; font-weight: 700;
+}
+@media (max-width: 560px) { .qm { padding: 5px 11px; font-size: 12.5px; } }
+
+/* 看图猜药：选项被遮住的样子 */
+.g-opt.veiled {
+  color: #b9c6c0; letter-spacing: 2px; background: #f3f6f4;
+  border-style: dashed; cursor: pointer;
+}
+.g-opt.veiled:hover { color: var(--brand); border-color: var(--brand); }
+.g-veilnote {
+  margin-top: 10px; font-size: 12.5px; line-height: 1.8; color: #8b9791;
+  background: #f6f9f7; border: 1px dashed var(--line);
+  border-radius: 10px; padding: 9px 12px;
+}

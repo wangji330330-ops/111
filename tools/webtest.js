@@ -34,11 +34,15 @@ L.APP.categories = herbs.meta.categories;
 L.APP.synonyms = JSON.parse(fs.readFileSync(path.join(web, 'data/synonyms.json'), 'utf8'));
 L.buildIndex();
 
+/* 组卷方案：分值必须取自 app.js 的 POINTS，别在这里写死 3/5/2/3 ——
+   1.6.0 把单选/填空改成 4 分，写死的算式会静默失去校验意义。 */
+const P = L.POINTS;
 const cfgs = [];
-for (const v of [[10, 4, 10], [20, 8, 0], [0, 0, 20], [12, 4, 5], [14, 4, 9]]) {
-  const rest = 100 - (v[0] * 3 + v[1] * 5 + v[2] * 2);
-  if (rest >= 0 && rest % 3 === 0) cfgs.push({ n1: v[0], n2: v[1], n3: v[2], n4: rest / 3 });
+for (const v of [[10, 4, 10], [20, 8, 0], [0, 0, 20], [12, 4, 5], [14, 4, 9], [25, 0, 0], [0, 20, 0]]) {
+  const rest = 100 - (v[0] * P.single + v[1] * P.multi + v[2] * P.judge);
+  if (rest >= 0 && rest % P.fill === 0) cfgs.push({ n1: v[0], n2: v[1], n3: v[2], n4: rest / P.fill });
 }
+if (!cfgs.length) throw new Error('没有可用的 100 分方案，检查 POINTS');
 
 let problems = 0, totalItems = 0;
 const typeCount = {}, badDetail = [];
@@ -51,7 +55,7 @@ for (let round = 1; round <= 40; round++) {
     cfg.cats = [L.APP.categories[round % L.APP.categories.length],
     L.APP.categories[(round + 7) % L.APP.categories.length]];
   }
-  if (cfg.n1 * 3 + cfg.n2 * 5 + cfg.n3 * 2 + cfg.n4 * 3 !== 100) mark('方案分错');
+  if (cfg.n1 * P.single + cfg.n2 * P.multi + cfg.n3 * P.judge + cfg.n4 * P.fill !== 100) mark('方案分错');
   const items = new L.Engine(cfg).build(cfg);
   totalItems += items.length;
   const seen = new Set();

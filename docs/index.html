@@ -6,8 +6,8 @@
 <title>中药学复习系统 · 网页版</title>
 <meta name="description" content="中药学复习系统网页版：中药速查（含实物图片）、100 分制限时测试、错题本、成绩记录。开源、纯静态、手机可用。">
 <meta name="theme-color" content="#1f6f54">
-<link rel="stylesheet" href="style.css?v=150">
-<link rel="stylesheet" href="style2.css?v=150">
+<link rel="stylesheet" href="style.css?v=160">
+<link rel="stylesheet" href="style2.css?v=160">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='48' fill='%231f6f54'/><text x='50' y='68' font-size='58' text-anchor='middle' fill='white' font-family='SimHei'>药</text></svg>">
 </head>
 <body>
@@ -27,10 +27,8 @@
   <nav class="tabs">
     <button class="tab active" data-tab="browse">中药速查</button>
     <button class="tab" data-tab="random">随机中药</button>
-    <button class="tab" data-tab="exam">开始测试</button>
+    <button class="tab" data-tab="exam">测一下</button>
     <button class="tab" data-tab="guess">看图猜药</button>
-    <button class="tab" data-tab="wrong">错题本</button>
-    <button class="tab" data-tab="scores">成绩记录</button>
   </nav>
 </header>
 
@@ -83,8 +81,15 @@
     </div>
   </section>
 
-  <!-- ========== 开始测试 ========== -->
+  <!-- ========== 测一下（出题设置 + 错题本 + 成绩记录） ========== -->
   <section class="page" id="page-exam">
+    <nav class="subtabs" id="examSubTabs">
+      <button class="subtab active" data-sub="setup">出题设置</button>
+      <button class="subtab" data-sub="wrong">错题本</button>
+      <button class="subtab" data-sub="scores">成绩记录</button>
+    </nav>
+
+    <div class="subpage active" id="sub-setup">
     <div id="setupPage">
       <div class="grid two">
         <div class="card">
@@ -103,14 +108,22 @@
         <div class="card">
           <fieldset>
             <legend>② 题型与分值（固定 100 分制，只需调题量）</legend>
-            <div class="qtyrow"><span class="nm">单项选择题</span><span class="pt">每题 3 分</span>
+            <div class="qmodes" id="qmodeRow">
+              <button type="button" class="qm" data-qm="all1">全是单选</button>
+              <button type="button" class="qm" data-qm="all2">全是多选</button>
+              <button type="button" class="qm" data-qm="all3">全是判断</button>
+              <button type="button" class="qm" data-qm="all4">全是填空</button>
+              <button type="button" class="qm" data-qm="mix">随机题型</button>
+            </div>
+            <div class="sub" style="margin:6px 0 8px">点上面任一模式会自动配好题量（正好 100 分）；也可以自己在下面微调</div>
+            <div class="qtyrow"><span class="nm">单项选择题</span><span class="pt">每题 4 分</span>
               <input type="number" id="n1" min="0" max="100" value="10"><span class="pt">题</span></div>
             <div class="qtyrow"><span class="nm">多项选择题</span><span class="pt">每题 5 分</span>
               <input type="number" id="n2" min="0" max="100" value="4"><span class="pt">题</span></div>
             <div class="qtyrow"><span class="nm">判断题</span><span class="pt">每题 2 分</span>
               <input type="number" id="n3" min="0" max="100" value="10"><span class="pt">题</span></div>
-            <div class="qtyrow"><span class="nm">填空题</span><span class="pt">每题 3 分</span>
-              <input type="number" id="n4" min="0" max="100" value="10"><span class="pt">题</span></div>
+            <div class="qtyrow"><span class="nm">填空题</span><span class="pt">每题 4 分</span>
+              <input type="number" id="n4" min="0" max="100" value="5"><span class="pt">题</span></div>
             <div class="total" id="totalInfo"></div>
           </fieldset>
 
@@ -172,6 +185,44 @@
     <div id="resultPage" class="hide">
       <div id="resultBox"></div>
     </div>
+    </div><!-- /sub-setup -->
+
+    <!-- 错题本 -->
+    <div class="subpage" id="sub-wrong">
+      <div class="grid wrong">
+        <div class="card">
+          <div class="sub" id="wrongSummary"></div>
+          <div class="list" id="wrongList" style="margin-top:8px"></div>
+        </div>
+        <div class="card">
+          <div id="wrongDetail"></div>
+        </div>
+      </div>
+      <div class="btnrow">
+        <button class="btn primary" id="startWrong">开始错题强化</button>
+        <button class="btn" id="exportWrong">导出为文本</button>
+        <button class="btn ghost" id="clearWrong">清空错题本</button>
+      </div>
+    </div>
+
+    <!-- 成绩记录 -->
+    <div class="subpage" id="sub-scores">
+      <div class="stats" id="scoresStat"></div>
+      <div class="card" style="margin-top:14px">
+        <h3>得分趋势（最近 20 次）</h3>
+        <div class="chartWrap" id="chart"></div>
+      </div>
+      <div class="card" style="margin-top:14px">
+        <h3>明细</h3>
+        <div class="tablewrap">
+          <table id="histTable">
+            <thead><tr><th>时间</th><th>模式</th><th>得分</th><th>正确率</th><th>正确/总题</th><th>用时</th><th>错题</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="btnrow"><button class="btn ghost" id="clearHist">清空记录</button></div>
+      </div>
+    </div>
   </section>
 
   <!-- ========== 看图猜药 ========== -->
@@ -183,43 +234,6 @@
       </div>
       <div id="guessBox"></div>
       <div class="motto" id="mottoLine"></div>
-    </div>
-  </section>
-
-  <!-- ========== 错题本 ========== -->
-  <section class="page" id="page-wrong">
-    <div class="grid wrong">
-      <div class="card">
-        <div class="sub" id="wrongSummary"></div>
-        <div class="list" id="wrongList" style="margin-top:8px"></div>
-      </div>
-      <div class="card">
-        <div id="wrongDetail"></div>
-      </div>
-    </div>
-    <div class="btnrow">
-      <button class="btn primary" id="startWrong">开始错题强化</button>
-      <button class="btn" id="exportWrong">导出为文本</button>
-      <button class="btn ghost" id="clearWrong">清空错题本</button>
-    </div>
-  </section>
-
-  <!-- ========== 成绩记录 ========== -->
-  <section class="page" id="page-scores">
-    <div class="stats" id="scoresStat"></div>
-    <div class="card" style="margin-top:14px">
-      <h3>得分趋势（最近 20 次）</h3>
-      <div class="chartWrap" id="chart"></div>
-    </div>
-    <div class="card" style="margin-top:14px">
-      <h3>明细</h3>
-      <div class="tablewrap">
-        <table id="histTable">
-          <thead><tr><th>时间</th><th>模式</th><th>得分</th><th>正确率</th><th>正确/总题</th><th>用时</th><th>错题</th></tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
-      <div class="btnrow"><button class="btn ghost" id="clearHist">清空记录</button></div>
     </div>
   </section>
 

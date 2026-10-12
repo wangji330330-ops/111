@@ -119,7 +119,8 @@ function renderGuess() {
   const answered = GUESS.picked !== null;
   const right = answered && GUESS.picked === GUESS.answer;
   const rate = st.total ? Math.round(st.right / st.total * 100) : 0;
-  const hideImg = GUESS.masked && !answered;
+  /* 遮住的是「选项」不是图片：先自己想答案，想好了再点「显示选项」对一下 */
+  const hideOpts = GUESS.masked && !answered;
 
   box.innerHTML = `
     <div class="g-stat">
@@ -128,15 +129,13 @@ function renderGuess() {
       <span class="g-chip">正确率 <b>${rate}%</b></span>
       <span class="g-chip">连对 <b>${st.streak}</b></span>
       <span class="g-chip">最高连对 <b>${st.best}</b></span>
-      <button class="btn small" id="guessMask">${GUESS.masked ? '👁 显示图片' : '🙈 先遮住图片'}</button>
+      <button class="btn small" id="guessMask">${GUESS.masked ? '显示选项' : '遮住选项'}</button>
       <button class="btn small" id="guessReset">重置统计</button>
     </div>
     <div class="g-main">
       <div class="g-pic">
-        ${hideImg
-          ? `<div class="g-mask" id="guessUnmask">图片已遮住<br><span>点这里揭示图片</span></div>`
-          : `<img src="images/${encodeURIComponent(GUESS.file)}" alt="看图猜药" id="guessImg"
-                 class="${answered ? 'zoomable' : ''}">`}
+        <img src="images/${encodeURIComponent(GUESS.file)}" alt="看图猜药" id="guessImg"
+             class="${answered ? 'zoomable' : ''}">
       </div>
       <div class="g-side">
         <div class="g-q">这张图是哪一味中药？</div>
@@ -147,9 +146,13 @@ function renderGuess() {
               if (n === GUESS.answer) cls += ' right';
               else if (n === GUESS.picked) cls += ' wrong';
             }
-            return `<button class="${cls}" data-n="${esc(n)}"${answered ? ' disabled' : ''}>${esc(n)}</button>`;
+            if (hideOpts) cls += ' veiled';
+            return `<button class="${cls}" data-n="${esc(n)}"${answered ? ' disabled' : ''}>` +
+                   `${hideOpts ? '？ ？ ？' : esc(n)}</button>`;
           }).join('')}
         </div>
+        ${hideOpts ? `<div class="g-veilnote">选项已遮住 —— 先自己在心里想好答案，
+          再点上面「显示选项」揭晓，然后选一个。</div>` : ''}
         ${answered ? `
           <div class="g-fb ${right ? 'ok' : 'no'}">
             <div class="g-fb-head">${right ? '✅ 答对了！' : '❌ 答错了'}</div>
@@ -180,6 +183,13 @@ function renderGuess() {
   box.querySelectorAll('.g-opt').forEach(b => {
     b.onclick = () => {
       if (GUESS.picked !== null) return;
+      /* 选项被遮住时，点它＝先把选项亮出来，不算作答 */
+      if (b.classList.contains('veiled')) {
+        const stm = guessStats(); stm.masked = false; LS.set(GUESS_KEY, stm);
+        GUESS.masked = false;
+        renderGuess();
+        return;
+      }
       GUESS.picked = b.dataset.n;
       const st2 = guessStats();
       st2.total++;
@@ -205,12 +215,6 @@ function renderGuess() {
     if (GUESS) GUESS.masked = st3.masked;
     renderGuess();
   };
-  const um = box.querySelector('#guessUnmask');
-  if (um) um.onclick = () => {
-    const st4 = guessStats(); st4.masked = false; LS.set(GUESS_KEY, st4);
-    if (GUESS) GUESS.masked = false;
-    renderGuess();
-  };
   const rs = box.querySelector('#guessReset');
   if (rs) rs.onclick = () => {
     if (confirm('确定重置看图猜药的统计吗？')) {
@@ -233,6 +237,7 @@ function bindGuessKeys() {
     if (/^[1-4]$/.test(e.key)) {
       const i = +e.key - 1;
       const btns = page.querySelectorAll('.g-opt');
+      /* 选项被遮住时数字键只揭晓、不答题（点 veiled 按钮也是揭晓） */
       if (btns[i] && !btns[i].disabled) btns[i].click();
     } else if (e.key === 'Enter' && GUESS.picked !== null) {
       const nx = page.querySelector('#guessNext');

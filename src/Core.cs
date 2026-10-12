@@ -478,16 +478,16 @@ namespace TcmReview
     // ------------------------------------------------------------------
     public class AppConfig
     {
-        // 固定 100 分制：单选 3 分、多选 5 分、填空 3 分、判断 2 分
-        // 默认题量：10×3 + 4×5 + 10×3 + 10×2 = 30+20+30+20 = 100 分
+        // 固定 100 分制：单选 4 分、多选 5 分、填空 4 分、判断 2 分
+        // 默认题量：10×4 + 4×5 + 10×2 + 5×4 = 40+20+20+20 = 100 分
         public int N1 = 10;            // 单选题数
         public int N2 = 4;             // 多选题数
         public int N3 = 10;            // 判断题数
-        public int N4 = 10;            // 填空题数
-        public int P1 = 3;
+        public int N4 = 5;             // 填空题数
+        public int P1 = 4;
         public int P2 = 5;
         public int P3 = 2;
-        public int P4 = 3;
+        public int P4 = 4;
         public int Minutes = 30;       // 限时（分钟），0 表示不限时
         public bool Immediate = false; // 即时反馈
         public bool Shuffle = true;    // 选项乱序
@@ -549,10 +549,10 @@ namespace TcmReview
             // 分值已锁定为 100 分制；旧版本配置若分值不符，直接回到默认题量
             if (loaded)
             {
-                c.P1 = 3; c.P2 = 5; c.P3 = 2; c.P4 = 3;
-                if (c.N1 * 3 + c.N2 * 5 + c.N3 * 2 + c.N4 * 3 != 100)
+                c.P1 = 4; c.P2 = 5; c.P3 = 2; c.P4 = 4;
+                if (c.N1 * 4 + c.N2 * 5 + c.N3 * 2 + c.N4 * 4 != 100)
                 {
-                    c.N1 = 10; c.N2 = 4; c.N3 = 10; c.N4 = 10;
+                    c.N1 = 10; c.N2 = 4; c.N3 = 10; c.N4 = 5;
                 }
             }
             if (c.Minutes < 0 || c.Minutes > 300) c.Minutes = 30;
@@ -1070,7 +1070,7 @@ namespace TcmReview
     // ------------------------------------------------------------------
     public static class UpdateChecker
     {
-        public const string CurrentVersion = "1.5.2";
+        public const string CurrentVersion = "1.6.0";
 
         /// <summary>可在此写死你的更新地址（版本文件），留空则用命令行 --update-url 指定</summary>
         public static string Url = "";

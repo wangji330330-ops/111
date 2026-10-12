@@ -30,6 +30,8 @@ namespace TcmReview
         private Dictionary<string, int> _wrongMap = new Dictionary<string, int>();
 
         // 测试页
+        private TabControl _examTabs;                  // 「测一下」里的子页
+        private Button[] _qmodeBtns;                   // 题型快捷模式按钮
         private ComboBox _modeBox;
         private CheckedListBox _catChecks;
         private NumericUpDown _q1, _q2, _q3, _q4;      // 单选/多选/填空/判断 题量
@@ -40,10 +42,10 @@ namespace TcmReview
         // 设置页
         private NumericUpDown _setWrongCount;
 
-        // 固定分值（100 分制）：单选3分、多选5分、填空3分、判断2分
-        private const int P_SINGLE = 3;
+        // 固定分值（100 分制）：单选4分、多选5分、填空4分、判断2分
+        private const int P_SINGLE = 4;
         private const int P_MULTI = 5;
-        private const int P_FILL = 3;
+        private const int P_FILL = 4;
         private const int P_JUDGE = 2;
         private const int FULL_SCORE = 100;
 
@@ -150,23 +152,33 @@ namespace TcmReview
             _tabs.BringToFront();
 
             TabPage pBrowse = new TabPage("中药速查");
-            TabPage pExam = new TabPage("开始测试");
-            TabPage pWrong = new TabPage("错题本");
-            TabPage pHist = new TabPage("成绩记录");
+            TabPage pExam = new TabPage("测一下");
             TabPage pSet = new TabPage("设置");
-            pBrowse.BackColor = Ui.Bg; pExam.BackColor = Ui.Bg;
-            pWrong.BackColor = Ui.Bg; pHist.BackColor = Ui.Bg; pSet.BackColor = Ui.Bg;
+            pBrowse.BackColor = Ui.Bg; pExam.BackColor = Ui.Bg; pSet.BackColor = Ui.Bg;
 
             _tabs.TabPages.Add(pBrowse);
             _tabs.TabPages.Add(pExam);
-            _tabs.TabPages.Add(pWrong);
-            _tabs.TabPages.Add(pHist);
             _tabs.TabPages.Add(pSet);
 
+            /* 「测一下」里再分三个子页：出题设置 / 错题本 / 成绩记录
+               （对应网页版 1.6.0 的改动：错题本与成绩记录并入「测一下」） */
+            _examTabs = new TabControl();
+            _examTabs.Dock = DockStyle.Fill;
+            _examTabs.Font = Ui.F(11f);
+            _examTabs.Padding = new Point(14, 4);
+            TabPage sSetup = new TabPage("出题设置");
+            TabPage sWrong = new TabPage("错题本");
+            TabPage sScores = new TabPage("成绩记录");
+            sSetup.BackColor = Ui.Bg; sWrong.BackColor = Ui.Bg; sScores.BackColor = Ui.Bg;
+            _examTabs.TabPages.Add(sSetup);
+            _examTabs.TabPages.Add(sWrong);
+            _examTabs.TabPages.Add(sScores);
+            pExam.Controls.Add(_examTabs);
+
             BuildBrowse(pBrowse);
-            BuildExam(pExam);
-            BuildWrong(pWrong);
-            BuildHistory(pHist);
+            BuildExam(sSetup);
+            BuildWrong(sWrong);
+            BuildHistory(sScores);
             BuildSettings(pSet);
         }
 
@@ -481,19 +493,36 @@ namespace TcmReview
             g1.Controls.Add(_catChecks);
 
             // ---- ② 题型与分值（固定 100 分制） ----
-            GroupBox g2 = MakeGroup("② 题型与分值（固定 100 分制，只需调题量）", 480, 210);
+            GroupBox g2 = MakeGroup("② 题型与分值（固定 100 分制，只需调题量）", 480, 258);
             g2.Left = 500;
             wrap.Controls.Add(g2);
 
-            _q1 = AddQtyRow(g2, "单项选择题", P_SINGLE, 32, 10);
-            _q2 = AddQtyRow(g2, "多项选择题", P_MULTI, 62, 4);
-            _q3 = AddQtyRow(g2, "填空题", P_FILL, 92, 10);
-            _q4 = AddQtyRow(g2, "判断题", P_JUDGE, 122, 10);
+            /* 题型模式：一键配好题量（正好 100 分），和网页版一致 */
+            Label qmLbl = Ui.Lbl("快捷模式", 10.5f, Ui.Sub, true);
+            qmLbl.Left = 16; qmLbl.Top = 28;
+            g2.Controls.Add(qmLbl);
+            string[] qmNames = { "全是单选", "全是多选", "全是判断", "全是填空", "随机题型" };
+            _qmodeBtns = new Button[qmNames.Length];
+            for (int i = 0; i < qmNames.Length; i++)
+            {
+                Button b = Ui.Btn(qmNames[i], 68, 26, Ui.Card, Ui.Brand, 9.5f);
+                b.Left = 16 + i * 74;
+                b.Top = 50;
+                int idx = i;
+                b.Click += delegate { ApplyQMode(idx); };
+                g2.Controls.Add(b);
+                _qmodeBtns[i] = b;
+            }
+
+            _q1 = AddQtyRow(g2, "单项选择题", P_SINGLE, 86, 10);
+            _q2 = AddQtyRow(g2, "多项选择题", P_MULTI, 114, 4);
+            _q3 = AddQtyRow(g2, "填空题", P_FILL, 142, 5);
+            _q4 = AddQtyRow(g2, "判断题", P_JUDGE, 170, 10);
 
             _totalLbl = Ui.Lbl("", 11.5f, Ui.Brand, true);
-            _totalLbl.Left = 16; _totalLbl.Top = 154;
+            _totalLbl.Left = 16; _totalLbl.Top = 200;
             _totalLbl.AutoSize = false;
-            _totalLbl.Width = 450; _totalLbl.Height = 46;
+            _totalLbl.Width = 450; _totalLbl.Height = 50;
             g2.Controls.Add(_totalLbl);
 
             foreach (NumericUpDown n in new NumericUpDown[] { _q1, _q2, _q3, _q4 })
@@ -567,7 +596,7 @@ namespace TcmReview
             resetBtn.Left = 16; resetBtn.Top = 94;
             resetBtn.Click += delegate
             {
-                _q1.Value = 10; _q2.Value = 4; _q3.Value = 10; _q4.Value = 10;
+                _q1.Value = 10; _q2.Value = 4; _q3.Value = 10; _q4.Value = 5;
                 _minuteBox.Value = 30;
                 UpdateTotal();
             };
@@ -649,6 +678,45 @@ namespace TcmReview
             for (int i = 0; i < _data.Categories.Count; i++)
                 if (_cfg.Cats.Contains(_data.Categories[i]))
                     _catChecks.SetItemChecked(i, true);
+        }
+
+        /// <summary>题型快捷模式：0 全单选 1 全多选 2 全判断 3 全填空 4 随机混搭</summary>
+        private void ApplyQMode(int idx)
+        {
+            switch (idx)
+            {
+                case 0: _q1.Value = 25; _q2.Value = 0; _q4.Value = 0; _q3.Value = 0; break;
+                case 1: _q1.Value = 0; _q2.Value = 20; _q4.Value = 0; _q3.Value = 0; break;
+                case 2: _q1.Value = 0; _q2.Value = 0; _q4.Value = 50; _q3.Value = 0; break;
+                case 3: _q1.Value = 0; _q2.Value = 0; _q4.Value = 0; _q3.Value = 25; break;
+                default: RandomMixQty(); break;
+            }
+            UpdateTotal();
+        }
+
+        /// <summary>随机混搭：四种题型都用上，且正好 100 分（只调题量、不动分值）</summary>
+        private void RandomMixQty()
+        {
+            Random rnd = new Random();
+            for (int i = 0; i < 500; i++)
+            {
+                int n1 = 1 + rnd.Next(21);        // 单选 1~21
+                int n2 = rnd.Next(13);            // 多选 0~12
+                int n3 = rnd.Next(31);            // 判断 0~30
+                int n4 = rnd.Next(16);            // 填空 0~15
+                int kinds = 0;
+                if (n1 > 0) kinds++;
+                if (n2 > 0) kinds++;
+                if (n3 > 0) kinds++;
+                if (n4 > 0) kinds++;
+                if (kinds < 3) continue;
+                if (n1 * P_SINGLE + n2 * P_MULTI + n3 * P_JUDGE + n4 * P_FILL == 100)
+                {
+                    _q1.Value = n1; _q2.Value = n2; _q4.Value = n3; _q3.Value = n4;
+                    return;
+                }
+            }
+            _q1.Value = 10; _q2.Value = 4; _q4.Value = 10; _q3.Value = 5;   // 兜底也是 100 分
         }
 
         private static decimal Clamp(int v, decimal min, decimal max)
@@ -817,11 +885,12 @@ namespace TcmReview
             _cfg.Immediate = false;
             _cfg.Minutes = 20;
             _cfg.Cats.Clear();
-            _q1.Value = 10; _q2.Value = 4; _q3.Value = 10; _q4.Value = 10;
+            _q1.Value = 10; _q2.Value = 4; _q3.Value = 10; _q4.Value = 5;
             _minuteBox.Value = 20;
             _modeBox.SelectedIndex = 2;
             UpdateTotal();
             _tabs.SelectedIndex = 1;
+            if (_examTabs != null) _examTabs.SelectedIndex = 0;
             StartQuiz();
         }
 

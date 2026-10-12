@@ -149,26 +149,26 @@ namespace TcmReview
                 cfg.Cats = new List<string>();
                 switch (kind)
                 {
-                    case 0:   // 全选择题：单选+多选 = 100 分
-                        cfg.N1 = 20; cfg.P1 = 3;
+                    case 0:   // 全选择题：单选 15×4 + 多选 8×5 = 100 分
+                        cfg.N1 = 15; cfg.P1 = 4;
                         cfg.N2 = 8; cfg.P2 = 5;
                         cfg.N3 = 0; cfg.N4 = 0;
                         break;
-                    case 1:   // 判断+填空 = 100 分
+                    case 1:   // 判断+填空 = 100 分：判断 10×2 + 填空 20×4
                         cfg.N1 = 0; cfg.N2 = 0;
                         cfg.N3 = 10; cfg.P3 = 2;
-                        cfg.N4 = 24; cfg.P4 = 3;
+                        cfg.N4 = 20; cfg.P4 = 4;
                         break;
-                    case 2:   // 默认 100 分制：单选 20×3 + 填空 10×3 + 判断 5×2
-                        cfg.N1 = 20; cfg.P1 = 3;
-                        cfg.N4 = 10; cfg.P4 = 3;
-                        cfg.N3 = 5; cfg.P3 = 2;
-                        break;
-                    default:  // 四种题型混合 = 100 分（含分类限定）
-                        cfg.N1 = 8; cfg.P1 = 3;
-                        cfg.N2 = 4; cfg.P2 = 5;
-                        cfg.N4 = 8; cfg.P4 = 3;
+                    case 2:   // 单选 + 填空 + 判断 = 100 分：15×4 + 5×4 + 10×2
+                        cfg.N1 = 15; cfg.P1 = 4;
+                        cfg.N4 = 5; cfg.P4 = 4;
                         cfg.N3 = 10; cfg.P3 = 2;
+                        break;
+                    default:  // 四种题型混合 = 100 分（含分类限定）：40+30+20+10
+                        cfg.N1 = 8; cfg.P1 = 4;      // 32
+                        cfg.N2 = 6; cfg.P2 = 5;      // 30
+                        cfg.N4 = 2; cfg.P4 = 4;      // 8
+                        cfg.N3 = 15; cfg.P3 = 2;     // 30  -> 合计 100
                         if (data.Categories.Count > 4)
                         {
                             cfg.Cats.Add(data.Categories[seed % data.Categories.Count]);

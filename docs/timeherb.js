@@ -134,9 +134,13 @@ function renderClock() {
 function gotoHerb(name) {
   switchTab('browse');
   setSearch(name);            /* 同步 ✕ 清空按钮显隐，别直接赋值 */
+  /* 分类筛选也要一起清干净，并且必须走 renderCategoryChips()。
+     以前这里只手动把「全部分类」点亮，之前选中的子类 chip 还是 active，
+     看着像"分类还选着、列表却是全部"。 */
   browseCat = '';
-  document.querySelectorAll('#catChips .chip').forEach(c =>
-    c.classList.toggle('active', c.dataset.cat === ''));
+  browseGroup = '';
+  saveBrowse();
+  renderCategoryChips();
   renderHerbList();
   showHerb(name);
   window.scrollTo({ top: 0, behavior: 'smooth' });

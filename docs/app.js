@@ -14,12 +14,13 @@ const APP = {
   imgCache: new Map(),
   timer: null,
   cfg: {
-    n1: 10, n2: 4, n3: 10, n4: 10,   // 单选 多选 判断 填空
+    n1: 10, n2: 4, n3: 10, n4: 5,   // 单选 多选 判断 填空（4/5/2/4 分 → 正好 100）
+    qmode: 'mix',                    // 题型模式：all1/all2/all3/all4/mix/custom
     minutes: 30, immediate: false, mode: 'random', cats: []
   }
 };
 
-const POINTS = { single: 3, multi: 5, judge: 2, fill: 3 };
+const POINTS = { single: 4, multi: 5, judge: 2, fill: 4 };
 
 /* ------------------------------------------------------------------ */
 /* 工具                                                                */
@@ -446,19 +447,39 @@ function toast(msg, ms) {
   toast._t = setTimeout(() => el.classList.remove('show'), ms || 2200);
 }
 
+/* 「测一下」里的三个子页：出题设置 / 错题本 / 成绩记录 */
+let EXAM_SUB = 'setup';
+
+function switchExamSub(sub, silent) {
+  if (!['setup', 'wrong', 'scores'].includes(sub)) sub = 'setup';
+  /* 正在答题/看成绩单时不让切走子页 */
+  const busy = QUIZ && !QUIZ.finished &&
+    ($('#quizPage') && !$('#quizPage').classList.contains('hide'));
+  if (busy && !silent) { toast('正在答题，交卷后再切吧'); return; }
+  EXAM_SUB = sub;
+  $$('#examSubTabs .subtab').forEach(b => b.classList.toggle('active', b.dataset.sub === sub));
+  $$('#page-exam .subpage').forEach(p => p.classList.toggle('active', p.id === 'sub-' + sub));
+  if (sub === 'wrong') renderWrong();
+  if (sub === 'scores') renderScores();
+}
+
 function switchTab(name) {
+  /* 兼容旧链接：#wrong / #scores 现在都在「测一下」里面 */
+  let sub = null;
+  if (name === 'wrong') { sub = 'wrong'; name = 'exam'; }
+  if (name === 'scores') { sub = 'scores'; name = 'exam'; }
   $$('.tab').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
   $$('.page').forEach(p => p.classList.toggle('active', p.id === 'page-' + name));
-  if (name === 'wrong') renderWrong();
-  if (name === 'scores') renderScores();
+  if (name === 'exam') switchExamSub(sub || EXAM_SUB, true);
   if (name === 'random') renderRandomHerb();
   if (name === 'guess') { renderGuess(); sprinkleMotto(); }
   /* 支持链接直达：#browse / #random / #exam / #guess / #wrong / #scores
      也支持 #browse/麻黄 定位到某味药（切换药时不覆盖带药名的 hash） */
   try {
     const cur = (location.hash || '').replace('#', '');
-    const mine = (tab === 'browse') ? (browseName ? 'browse/' + encodeURIComponent(browseName) : 'browse') : name;
-    if (cur !== mine && !(cur.startsWith('browse/') && tab === 'browse')) {
+    const hashName = (name === 'exam' && sub) ? sub : name;
+    const mine = (name === 'browse') ? (browseName ? 'browse/' + encodeURIComponent(browseName) : 'browse') : hashName;
+    if (cur !== mine && !(cur.startsWith('browse/') && name === 'browse')) {
       history.replaceState(null, '', '#' + mine);
     }
   } catch (e) { }
@@ -626,8 +647,9 @@ function filteredHerbs() {
   });
 }
 
-/* 搜不到药材时的提示（列表与详情区都显示） */
-const MISS_HTML = `<div class="empty miss">
+/* 搜不到药材时的提示：列表区一句轻松的，详情区给联系方式 */
+const MISS_LIST_HTML = `<div class="empty miss"><div class="miss-face">看不懂~，TAT呜呜呜~</div></div>`;
+const MISS_DETAIL_HTML = `<div class="empty miss">
   <div class="miss-face">暂时没有该药材哦~OVO</div>
   <div class="miss-sub">后续会更新嘟，或者联系我来更新吧！</div>
   <a class="miss-mail" href="mailto:wangji330330@gmail.com?subject=%E8%8D%AF%E6%9D%90%E7%94%B3%E8%AF%B7">📫 wangji330330@gmail.com</a>
@@ -642,14 +664,21 @@ function renderHerbList() {
        <span class="row-name">${esc(h.n)}</span>
        ${h.p ? `<span class="row-py">${esc(h.p)}</span>` : ''}
        <span class="row-cat">${esc(h.c.split('·')[0])}</span>
-     </div>`).join('') || MISS_HTML;
+     </div>`).join('') || MISS_LIST_HTML;
   // 点击（含触摸）选中药物 —— 修复：之前速查列表漏绑事件，点不动
   box.onclick = e => {
     const row = e.target.closest('.row');
     if (row && row.dataset.name) showHerb(row.dataset.name);
   };
-  if (list.length) showHerb(list[0].n);
-  else $('#detail').innerHTML = MISS_HTML;
+  if (list.length) {
+    showHerb(list[0].n);
+  } else {
+    /* 搜不到时右侧必须彻底清空：以前只清了详情文字，
+       #imgBox 里上一味的图片还留在那儿，看着像"搜到了别的药" */
+    $('#detail').innerHTML = MISS_DETAIL_HTML;
+    $('#imgBox').innerHTML = '';
+    $('#hidBox').innerHTML = '';
+  }
 }
 
 function showHerb(name) {
@@ -830,6 +859,48 @@ function totalScore(cfg) {
     cfg.n3 * POINTS.judge + cfg.n4 * POINTS.fill;
 }
 
+/* ------------------------------------------------------------------ */
+/* 题型模式：全单选 / 全多选 / 全判断 / 全填空 / 随机混搭                 */
+/* ------------------------------------------------------------------ */
+const QMODES = {
+  all1: { name: '全是单选', qty: () => ({ n1: 25, n2: 0, n3: 0, n4: 0 }) },
+  all2: { name: '全是多选', qty: () => ({ n1: 0, n2: 20, n3: 0, n4: 0 }) },
+  all3: { name: '全是判断', qty: () => ({ n1: 0, n2: 0, n3: 50, n4: 0 }) },
+  all4: { name: '全是填空', qty: () => ({ n1: 0, n2: 0, n3: 0, n4: 25 }) },
+  mix: { name: '随机题型', qty: randomMixQty }
+};
+
+/* 随机混搭：四种题型都用上，且正好凑够 100 分（不靠调分值，只调题量） */
+function randomMixQty() {
+  for (let i = 0; i < 400; i++) {
+    const n1 = 1 + Math.floor(Math.random() * 21);   // 单选 1~21
+    const n2 = Math.floor(Math.random() * 13);       // 多选 0~12
+    const n3 = Math.floor(Math.random() * 31);       // 判断 0~30
+    const n4 = Math.floor(Math.random() * 16);       // 填空 0~15
+    const kinds = [n1, n2, n3, n4].filter(x => x > 0).length;
+    if (kinds < 3) continue;                          // 至少三种题型混搭
+    if (n1 * POINTS.single + n2 * POINTS.multi + n3 * POINTS.judge + n4 * POINTS.fill === 100)
+      return { n1, n2, n3, n4 };
+  }
+  return { n1: 10, n2: 4, n3: 10, n4: 5 };            // 兜底：也是 100 分
+}
+
+function applyQMode(mode) {
+  APP.cfg.qmode = mode;
+  const m = QMODES[mode];
+  if (!m) return;
+  const q = m.qty();
+  $('#n1').value = q.n1; $('#n2').value = q.n2;
+  $('#n3').value = q.n3; $('#n4').value = q.n4;
+  paintQModeBtns();
+  updateTotal();
+}
+
+function paintQModeBtns() {
+  $$('#qmodeRow .qm').forEach(b =>
+    b.classList.toggle('active', b.dataset.qm === APP.cfg.qmode));
+}
+
 function updateTotal() {
   const cfg = readCfgFromUI();
   const total = totalScore(cfg);
@@ -843,6 +914,12 @@ function updateTotal() {
   el.textContent = qs === 0 ? '请至少设置一种题型' : txt;
   el.className = 'total ' + (ok ? 'ok' : 'bad');
   $('#startBtn').disabled = !ok;
+  /* 手动改了题量就切成"自定义"，别让按钮还高亮着某个预设 */
+  const q = APP.cfg.qmode && QMODES[APP.cfg.qmode] ? QMODES[APP.cfg.qmode].qty() : null;
+  if (q && (q.n1 !== cfg.n1 || q.n2 !== cfg.n2 || q.n3 !== cfg.n3 || q.n4 !== cfg.n4)) {
+    APP.cfg.qmode = 'custom';
+    paintQModeBtns();
+  }
   LS.set('cfg', cfg);
 }
 
@@ -856,6 +933,7 @@ function applyCfgToUI() {
   $('#mode').value = c.mode || 'random';
   $('#cats').innerHTML = APP.categories.map(cat =>
     `<label class="cbx"><input type="checkbox" value="${esc(cat)}"${c.cats && c.cats.includes(cat) ? ' checked' : ''}> ${esc(cat)}</label>`).join('');
+  paintQModeBtns();
   updateTotal();
 }
 
@@ -1163,6 +1241,8 @@ function renderWrong() {
       switchTab('browse');
       setSearch(h.n);
       browseCat = '';
+      browseGroup = '';      /* 大类也要清，否则子类行还停在上一次的大类 */
+      saveBrowse();
       renderCategoryChips();
       renderHerbList();
       window.scrollTo({ top: 0 });
@@ -1279,6 +1359,9 @@ async function boot() {
 
 function bindEvents() {
   $$('.tab').forEach(b => b.onclick = () => switchTab(b.dataset.tab));
+  $$('#examSubTabs .subtab').forEach(b => b.onclick = () => switchExamSub(b.dataset.sub));
+  /* 题型模式按钮 */
+  $$('#qmodeRow .qm').forEach(b => b.onclick = () => applyQMode(b.dataset.qm));
   /* 搜索框：输入即筛；有内容时显示 ✕ 清空按钮 */
   const search = $('#search'), clearBtn = $('#clearSearch');
   const syncClear = () => { if (clearBtn) clearBtn.classList.toggle('hide', !search.value); };
