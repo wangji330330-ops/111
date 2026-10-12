@@ -198,7 +198,7 @@ namespace TcmReview
             card.Padding = new Padding(12);
             left.Controls.Add(card);
 
-            Label l1 = Ui.Lbl("搜索药名 / 功效 / 性味 / 归经", 10.5f, Ui.Sub, true);
+            Label l1 = Ui.Lbl("搜索药名 / 别名 / 拼音 / 功效 / 性味 / 归经", 10.5f, Ui.Sub, true);
             l1.Dock = DockStyle.Top;
             card.Controls.Add(l1);
 
@@ -339,8 +339,8 @@ namespace TcmReview
                 if (onlyWrong && !_wrongMap.ContainsKey(h.Name)) continue;
                 if (key.Length > 0)
                 {
-                    string blob = h.Name + h.Pinyin + SearchText.PlainPinyin(h.Pinyin)
-                        + h.Nature + h.Meridian + h.FxText + h.Cat;
+                    string blob = h.Name + h.Alias + h.Pinyin + SearchText.PlainPinyin(h.Pinyin)
+                        + h.Nature + h.Meridian + h.FxText + h.Cat + h.Part + h.Area;
                     string k = key;
                     if (blob.IndexOf(k, StringComparison.OrdinalIgnoreCase) < 0)
                     {
@@ -380,6 +380,16 @@ namespace TcmReview
             Append("【药名】", Ui.Brand);
             Append(h.Name + "\n", Ui.Text, true);
             if (h.Pinyin.Length > 0) Append(h.Pinyin + "\n", Ui.Accent, true);
+            if (h.Alias.Length > 0)
+            {
+                Append("【别名】", Ui.Brand);
+                Append(h.Alias + "\n", Ui.Text);
+            }
+            if (h.Part.Length > 0)
+            {
+                Append("【药用部位】", Ui.Brand);
+                Append(h.Part + "\n", Ui.Text);
+            }
             Append("【分类】", Ui.Brand);
             Append(h.Cat + "\n", Ui.Text);
             Append("【性味】", Ui.Brand);
@@ -390,12 +400,36 @@ namespace TcmReview
             Append(h.FxText + "\n", Ui.Accent, true);
             Append("【用法用量】", Ui.Brand);
             Append(h.Usage + "\n", Ui.Text);
+            if (h.Area.Length > 0)
+            {
+                Append("【产地分布】", Ui.Brand);
+                Append(h.Area + "\n", Ui.Text);
+            }
             Append("【使用注意】", Ui.Brand);
             Append(h.Caution + "\n", Ui.Text);
+            string legend = SrcLegend(h);
+            if (legend.Length > 0) Append("\n" + legend + "\n", Ui.Sub, false);
             if (_wrongMap.ContainsKey(h.Name))
                 Append("\n※ 该药在你的错题本中（累计错 " + _wrongMap[h.Name] + " 次）", Ui.Bad, true);
 
             ShowImages(h);
+        }
+
+        /// <summary>资料出处说明（别名/药用部位/产地各自的来源）</summary>
+        private static string SrcLegend(Herb h)
+        {
+            string[] codes = new string[] { h.AliasSrc, h.PartSrc, h.AreaSrc };
+            System.Collections.Generic.List<string> used =
+                new System.Collections.Generic.List<string>();
+            string s = "资料来源：";
+            foreach (string c in codes)
+            {
+                string n = Herb.SrcName(c);
+                if (n.Length == 0 || used.Contains(c)) continue;
+                used.Add(c);
+                s += (used.Count > 1 ? "　·　" : "") + c + " " + n;
+            }
+            return used.Count > 0 ? s : "";
         }
 
         /// <summary>显示该药的内嵌图片（已缩放缓存，避免切换时掉帧）</summary>

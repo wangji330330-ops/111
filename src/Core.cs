@@ -1,4 +1,4 @@
-// =====================================================================
+﻿// =====================================================================
 //  中药学复习系统 —— 核心库：数据模型 / JSON 解析 / 设置存储
 //  文件: Core.cs
 //  说明: 兼容 C# 5 / .NET Framework 4.x（系统自带，无需安装运行时）
@@ -20,6 +20,12 @@ namespace TcmReview
     {
         public string Name = "";
         public string Pinyin = "";     // 拼音（审定表，见 pinyin_table.py）
+        public string Alias = "";      // 别名
+        public string Area = "";       // 产地分布
+        public string Part = "";       // 药用部位
+        public string AliasSrc = "";   // 别名出处（T天津规范 / C道地目录 / P药典）
+        public string AreaSrc = "";
+        public string PartSrc = "";
         public string Cat = "";
         public string Nature = "";     // 性味
         public string Meridian = "";   // 归经
@@ -62,6 +68,18 @@ namespace TcmReview
             get { return Pinyin.Length > 0 ? Name + "   " + Pinyin : Name; }
         }
 
+        /// <summary>资料出处代号 → 全称（T 天津规范 / C 道地目录 / P 药典）</summary>
+        public static string SrcName(string code)
+        {
+            switch (code)
+            {
+                case "T": return "《天津市中药饮片炮制规范》2022年版";
+                case "C": return "《道地药材产品认证目录》（中国质量认证中心）";
+                case "P": return "《中华人民共和国药典》2020年版一部";
+            }
+            return "";
+        }
+
         public bool HasFx(string item)
         {
             foreach (string s in Fx)
@@ -89,11 +107,14 @@ namespace TcmReview
         {
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("【药名】" + Name + (Pinyin.Length > 0 ? "（" + Pinyin + "）" : ""));
+            if (Alias.Length > 0) sb.AppendLine("【别名】" + Alias);
+            if (Part.Length > 0) sb.AppendLine("【药用部位】" + Part);
             sb.AppendLine("【分类】" + Cat);
             sb.AppendLine("【性味】" + Nature);
             sb.AppendLine("【归经】" + Meridian);
             sb.AppendLine("【功效】" + FxText);
             sb.AppendLine("【用法用量】" + Usage);
+            if (Area.Length > 0) sb.AppendLine("【产地分布】" + Area);
             sb.AppendLine("【使用注意】" + Caution);
             return sb.ToString();
         }
@@ -236,6 +257,12 @@ namespace TcmReview
                         Herb h = new Herb();
                         h.Name = Str(d, "name");
                         h.Pinyin = Str(d, "pinyin");
+                        h.Alias = Str(d, "alias");
+                        h.Area = Str(d, "area");
+                        h.Part = Str(d, "part");
+                        h.AliasSrc = Str(d, "aliasSrc");
+                        h.AreaSrc = Str(d, "areaSrc");
+                        h.PartSrc = Str(d, "partSrc");
                         h.Cat = Str(d, "cat");
                         h.Nature = Str(d, "nature");
                         h.Meridian = Str(d, "meridian");
@@ -1070,7 +1097,7 @@ namespace TcmReview
     // ------------------------------------------------------------------
     public static class UpdateChecker
     {
-        public const string CurrentVersion = "1.6.0";
+        public const string CurrentVersion = "1.7.0";
 
         /// <summary>可在此写死你的更新地址（版本文件），留空则用命令行 --update-url 指定</summary>
         public static string Url = "";

@@ -640,7 +640,8 @@ function filteredHerbs() {
     if (browseCat && h.c !== browseCat) return false;
     if (onlyWrong && !wrong[h.n]) return false;
     if (key) {
-      const blob = h.n + h.x + h.m + h.f.join('') + h.c + (h.p || '');
+      /* 别名也参与搜索：搜「田七」能找到「三七」 */
+      const blob = h.n + (h.a || '') + h.x + h.m + h.f.join('') + h.c + (h.p || '');
       if (blob.toLowerCase().indexOf(k) < 0 && (!kp || pyKey(blob).indexOf(kp) < 0)) return false;
     }
     return true;
@@ -691,15 +692,39 @@ function showHerb(name) {
     <h2>${esc(h.n)}</h2>
     ${h.p ? `<div class="py-name">${esc(h.p)}</div>` : ''}
     <dl>
+      ${h.a ? `<dt>别名</dt><dd>${esc(h.a)}${srcTag(h.as)}</dd>` : ''}
+      ${h.q ? `<dt>药用部位</dt><dd>${esc(h.q)}${srcTag(h.qs)}</dd>` : ''}
       <dt>分类</dt><dd>${esc(h.c)}</dd>
       <dt>性味</dt><dd>${esc(h.x)}</dd>
       <dt>归经</dt><dd>${esc(h.m)}</dd>
       <dt>功效</dt><dd class="fx">${esc(h.f.join('；'))}</dd>
       <dt>用法用量</dt><dd>${esc(h.u)}</dd>
+      ${h.g ? `<dt>产地分布</dt><dd>${esc(h.g)}${srcTag(h.gs)}</dd>` : ''}
       <dt>使用注意</dt><dd>${esc(h.k)}</dd>
     </dl>
+    ${srcLegend(h)}
     ${wrong[h.n] ? `<div class="warnbox">※ 该药在你的错题本中（累计错 ${wrong[h.n]} 次）</div>` : ''}`;
   renderImages(h.n);
+}
+
+/* 资料出处：T=天津市中药饮片炮制规范、C=道地药材产品认证目录、P=中国药典 */
+const SRC_NAME = {
+  T: '《天津市中药饮片炮制规范》2022年版',
+  C: '《道地药材产品认证目录》（中国质量认证中心）',
+  P: '《中华人民共和国药典》2020年版一部'
+};
+function srcTag(code) {
+  return code && SRC_NAME[code]
+    ? `<span class="src-tag" title="资料来源：${esc(SRC_NAME[code])}">${esc(code)}</span>` : '';
+}
+function srcLegend(h) {
+  const used = [];
+  [['as', h.as], ['qs', h.qs], ['gs', h.gs]].forEach(([k, c]) => {
+    if (c && SRC_NAME[c] && !used.includes(c)) used.push(c);
+  });
+  if (!used.length) return '';
+  return `<div class="src-legend">资料来源：${used.map(c =>
+    `<b>${esc(c)}</b> ${esc(SRC_NAME[c])}`).join('　·　')}</div>`;
 }
 
 function renderImages(name) {

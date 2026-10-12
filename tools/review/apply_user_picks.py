@@ -23,7 +23,21 @@ NAMES_FILE = os.path.join(ROOT, "review", "refetch_names.txt")
 REPORT = os.path.join(ROOT, "review", "picks_report.txt")
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import apply_hd  # noqa: E402
 from apply_hd import candidates, main as apply_main  # noqa: E402
+
+
+def use_round2():
+    """切到第二轮：review/picks_user2.txt + review/hd2/"""
+    global PICKS, HD, INDEX, NAMES_FILE, REPORT
+    PICKS = os.path.join(ROOT, "review", "picks_user2.txt")
+    HD = os.path.join(ROOT, "review", "hd2")
+    INDEX = os.path.join(HD, "index.json")
+    NAMES_FILE = os.path.join(ROOT, "review", "refetch_names2.txt")
+    REPORT = os.path.join(ROOT, "review", "picks_report2.txt")
+    # apply_hd 里也有自己的一份 HD/INDEX，必须一起切，否则列号会对到别的目录
+    apply_hd.HD = HD
+    apply_hd.INDEX = INDEX
 
 
 def parse_picks():
@@ -79,6 +93,12 @@ def report(want, applied_note=""):
     L.append("   合计：%s" % "、".join(not_picked + thin))
     L.append("")
 
+    # 全库口径：不管在不在本次清单里，只要最终图片 ≤1 张就列出来
+    allthin = sorted(h["name"] for h in herbs
+                     if len(manifest.get(h["name"], {}).get("files", [])) <= 1)
+    L.append("⑤ 全库图片 ≤1 张的（%d 味，含不在本次清单里的）：" % len(allthin))
+    L.append("   " + ("、".join(allthin) if allthin else "无"))
+
     noimg = [h["name"] for h in herbs if not manifest.get(h["name"], {}).get("files")]
     outside = [n for n in noimg if n not in names]
     L.append("② 题库里仍然没有图片的（%d 味）：" % len(noimg))
@@ -94,8 +114,10 @@ def report(want, applied_note=""):
 
 
 def main():
+    if "--round2" in sys.argv:
+        use_round2()
     specs, want = parse_picks()
-    print("解析到 %d 条选择\n" % len(specs))
+    print("解析到 %d 条选择（%s）\n" % (len(specs), "第二轮" if "--round2" in sys.argv else "第一轮"))
     note = ""
     if "--apply" in sys.argv:
         sys.argv = [sys.argv[0]] + specs

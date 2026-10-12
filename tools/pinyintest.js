@@ -155,7 +155,7 @@ const pairs = [
   ['timeherb.js 随机卡片', fs.readFileSync(path.join(docs, 'timeherb.js'), 'utf8').includes('rand-py')],
   ['style2.css 拼音样式', ['.row-py', '.py-name', '.g-ans-py', '.rand-py']
     .every(s => fs.readFileSync(path.join(docs, 'style2.css'), 'utf8').includes(s))],
-  ['index.html 搜索提示含拼音', fs.readFileSync(path.join(docs, 'index.html'), 'utf8').includes('搜索药名 / 拼音')],
+  ['index.html 搜索提示含拼音', /搜索药名[^"]*拼音/.test(fs.readFileSync(path.join(docs, 'index.html'), 'utf8'))],
   ['桌面版数据含拼音', fs.readFileSync(path.join(root, 'src', 'EmbeddedData.cs'), 'utf8').includes('pinyin')],
   ['桌面版界面含拼音', ['Pinyin', 'ListText', 'PlainPinyin']
     .every(s => fs.readFileSync(path.join(root, 'src', 'Core.cs'), 'utf8').includes(s))]

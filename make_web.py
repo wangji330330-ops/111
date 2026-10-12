@@ -24,11 +24,10 @@ DATA = os.path.join(WEB, "data")
 IMGSRC = os.path.join(HERE, "images")
 IMGDST = os.path.join(WEB, "images")
 
-VERSION = "1.6.0"
+VERSION = "1.7.0"
 
-NOTES = ("1.6.0：新增题型快捷模式（全单选/全多选/全判断/全填空/随机题型，一键凑够 100 分）；"
-         "单选与填空改为 4 分/题，默认题量 10/4/10/5；「开始测试」改名「测一下」并并入错题本与成绩记录；"
-         "修掉推荐参考跳转后分类残留高亮、搜不到药时右侧残留旧图；看图猜药改为「遮住选项」")
+NOTES = ("1.7.0：每味药新增【别名】【产地分布】【药用部位】三项，搜索支持别名（搜「田七」能找到三七）；"
+         "数据取自《天津市中药饮片炮制规范》2022、《道地药材产品认证目录》、《中国药典》2020，逐项标注出处")
 MAX_SIDE = 420
 QUALITY = 70
 
@@ -97,6 +96,10 @@ def main():
         out_herbs.append({
             "n": name, "p": h.get("pinyin", ""), "c": h["cat"], "x": h["nature"],
             "m": h["meridian"], "f": h["fx"], "u": h["usage"], "k": h["caution"],
+            # 别名 / 产地分布 / 药用部位 + 各自的来源代号（T天津规范 C道地目录 P药典）
+            "a": h.get("alias", ""), "as": h.get("aliasSrc", ""),
+            "g": h.get("area", ""), "gs": h.get("areaSrc", ""),
+            "q": h.get("part", ""), "qs": h.get("partSrc", ""),
         })
 
     save_json(os.path.join(DATA, "herbs.json"), {

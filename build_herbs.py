@@ -425,6 +425,14 @@ def main():
     except ImportError:
         PINYIN = {}
 
+    # ---- 别名 / 产地分布 / 药用部位（审定表：herb_fields.py）----
+    # 表由 tools/review/build_fields.py 生成，来源是省级中药饮片炮制规范、
+    # 道地药材产品认证目录、《中国药典》基原。缺项一律留空，宁缺毋滥。
+    try:
+        from herb_fields import FIELDS
+    except ImportError:
+        FIELDS = {}
+
     for rec in RAW:
         name, cat, nature, meridian, fx, usage, caution = rec
         if name in seen:
@@ -443,10 +451,14 @@ def main():
         elif len(py.split()) != len(name):
             errs.append("拼音音节数与字数不符: %s -> %s" % (name, py))
         cats.setdefault(cat, []).append(name)
+        f = FIELDS.get(name, ("", "", "", "", "", ""))
         data.append({
             "name": name, "pinyin": py or "", "cat": cat,
             "nature": nature, "meridian": meridian,
             "fx": list(fx), "usage": usage, "caution": caution,
+            "alias": f[0], "aliasSrc": f[1],
+            "area": f[2], "areaSrc": f[3],
+            "part": f[4], "partSrc": f[5],
         })
 
     # 检查同分类下是否存在完全相同的功效组合（会造成多选干扰项歧义）
