@@ -1070,7 +1070,7 @@ namespace TcmReview
     // ------------------------------------------------------------------
     public static class UpdateChecker
     {
-        public const string CurrentVersion = "1.5.1";
+        public const string CurrentVersion = "1.5.2";
 
         /// <summary>可在此写死你的更新地址（版本文件），留空则用命令行 --update-url 指定</summary>
         public static string Url = "";
