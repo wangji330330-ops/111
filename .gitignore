@@ -40,3 +40,6 @@ patch_*.py
 .idea/
 Thumbs.db
 desktop.ini
+/_android/
+/.tcmapk-link
+/发布/*.apk

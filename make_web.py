@@ -24,10 +24,10 @@ DATA = os.path.join(WEB, "data")
 IMGSRC = os.path.join(HERE, "images")
 IMGDST = os.path.join(WEB, "images")
 
-VERSION = "1.7.1"
+VERSION = "1.8.0"
 
-NOTES = ("1.7.0：每味药新增【别名】【产地分布】【药用部位】三项，搜索支持别名（搜「田七」能找到三七）；"
-         "数据取自《天津市中药饮片炮制规范》2022、《道地药材产品认证目录》、《中国药典》2020，逐项标注出处")
+NOTES = ("1.8.0：新增**安卓版 APK**（网页右上角可直接下载安装，内容与网页版完全一致、全部离线）；"
+         "APK 内嵌本地 http 服务，错题本/成绩记录照常保存")
 MAX_SIDE = 420
 QUALITY = 70
 

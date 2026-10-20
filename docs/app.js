@@ -1532,3 +1532,15 @@ function exportWrong() {
 }
 
 boot();
+
+/* ------------------------------------------------------------------ */
+/* 已经在 APK 里跑的时候，就不用再显示「下载安卓版 APK」按钮了          */
+/* （APK 内部页面是通过 127.0.0.1 的本地服务加载的，正好据此判断）      */
+/* ------------------------------------------------------------------ */
+document.addEventListener('DOMContentLoaded', function () {
+  var h = location.hostname;
+  if (h === '127.0.0.1' || h === 'localhost' || location.protocol === 'file:') {
+    var b = document.getElementById('apkBtn');
+    if (b) { b.style.display = 'none'; }
+  }
+});

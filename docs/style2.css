@@ -467,3 +467,8 @@ main { padding-bottom: 26px; }
 #search::-webkit-input-placeholder { font-size: 12.5px; color: #9aa8a2; }
 #search::-moz-placeholder { font-size: 12.5px; color: #9aa8a2; opacity: 1; }
 @media (max-width: 560px) { #search::placeholder { font-size: 11.5px; } }
+
+/* 安卓版下载按钮（是 <a>，要去掉下划线并跟按钮对齐） */
+a.btn { text-decoration: none; display: inline-block; box-sizing: border-box; }
+a.btn:visited { color: inherit; }
+#apkBtn { color: var(--brand); }
