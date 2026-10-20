@@ -39,24 +39,69 @@ def split_alias(s):
     return [x.strip() for x in re.split(r"[、,，;；\s]+", s or "") if 1 < len(x.strip()) <= 10]
 
 
+# 人工核对过的「题库药名 → 标准里的品名」映射。
+# 只用同物异名（产地前缀、饮片习称），绝不做盲目子串匹配 ——
+# 子串规则会把「土茯苓←茯苓」「胡黄连←黄连」「莲子←苦石莲子」这类全配错。
+MANUAL_PAIRS = {
+    # 道地药材产品的产地前缀 / 习称
+    "菊花": ["杭白菊", "亳菊", "滁菊", "贡菊", "怀菊"],
+    "黄芪": ["北芪"],
+    "沙苑子": ["潼沙苑"],
+    "茯苓": ["云苓", "茯苓（安苓）"],
+    "何首乌": ["广首乌"],
+    "天花粉": ["安阳花粉"],
+    "白附子": ["禹白附"],
+    "密蒙花": ["密印花"],
+    "薏苡仁": ["祁薏米"],
+    "金银花": ["东银花"],
+    "枸杞子": ["宁夏枸杞"],
+    "全蝎": ["青州蝎"],
+    "艾叶": ["蕲艾"],
+    "牡丹皮": ["川丹皮"],
+    "吴茱萸": ["江吴萸", "常吴萸"],
+    "刺蒺藜": ["蒺藜"],
+    # 天津规范里的品名
+    "生地黄": ["地黄"],
+    "熟地黄": ["地黄"],
+    "益智仁": ["益智"],
+    "海浮石": ["浮石"],
+    "厚朴花": ["厚朴"],
+    "茯苓皮": ["茯苓"],
+}
+
+
+def manual_lookup(name):
+    """题库药名 → 标准里的候选品名列表"""
+    return MANUAL_PAIRS.get(name, [])
+
+
 def clean_alias(s, self_name):
-    """别名只留真正的别名：剔掉调剂术语与药名本身"""
+    """别名只留真正好用的那些（精简规则，宁可少而准）：
+
+    1. 去掉药名本身；
+    2. 去掉**包含药名**的（「草麻黄」「川升麻」这类是原植物／产地变体名，
+       不是别名，也是最容易让人看懵的一类）；
+    3. 去掉调剂应付术语（「写麻黄付麻黄」「蜜麻黄均付蜜麻黄」）；
+    4. 长度限 2~6 字；最后最多保留 4 条。
+    """
     out = []
     for a in split_alias(s):
+        a = a.strip("。；，、")
         if a == self_name:
             continue
-        if "付" in a or "写" in a or "均" in a:      # 调剂应付术语，不是别名
+        if self_name and self_name in a:
             continue
-        if len(a) > 8:
+        if "付" in a or "写" in a or "均" in a:
+            continue
+        if not (2 <= len(a) <= 6):
             continue
         out.append(a)
-    # 去重且保持顺序
     seen, res = set(), []
     for a in out:
         if a not in seen:
             seen.add(a)
             res.append(a)
-    return "、".join(res)
+    return "、".join(res[:4])
 
 
 def pick_part(text):
@@ -70,6 +115,7 @@ def pick_part(text):
     if not ms:
         return ""
     s = ms[-1].group(1)
+    s = re.sub(r"^[或及和、]+", "", s).strip()
     if "植物" in s or "科" in s or "的" in s:
         return ""
     return s if 2 <= len(s) <= 10 else ""
@@ -86,6 +132,22 @@ def trim_area(s, limit=60):
         if i >= limit // 2:
             return cut[:i]
     return cut
+
+
+# 这些开头描述的是「生境/海拔」，不是产地，收进【产地分布】会误导
+HABITAT_HEAD = ("海拔", "生", "长于", "喜", "分布于海拔", "生长于", "野生于")
+
+
+def clean_area(s):
+    """产地字段的最后一道过滤：去掉生境描述，只留地名"""
+    s = re.sub(r"\s+", "", s or "").strip("。；，、")
+    if not s:
+        return ""
+    if s.startswith(HABITAT_HEAD):
+        # 「海拔2500m以下潮湿山坡…包括绵阳、达州」这种：把「包括/位于」后面的地名捞出来
+        m = re.search(r"(?:包括|位于|产于)([^。]{2,40})", s)
+        return trim_area(m.group(1)) if m else ""
+    return trim_area(s)
 
 
 def main():
@@ -115,11 +177,19 @@ def main():
             p = alias2name.get(h)
             if p:
                 e = by_name.get(p)
+        if not e:
+            # 人工核对过的同物异名（地黄→生地黄、蒺藜→刺蒺藜…）
+            for alt in manual_lookup(h):
+                if alt in by_name:
+                    e = by_name[alt]
+                    break
         if e:
             if e["part"]:
                 rec["part"], rec["srcPart"] = e["part"], SRC_TJ
             if e["area"]:
-                rec["area"], rec["srcArea"] = trim_area(e["area"]), SRC_TJ
+                ca = clean_area(e["area"])
+                if ca:
+                    rec["area"], rec["srcArea"] = ca, SRC_TJ
         al = alias_tbl.get(h)
         if not al:
             p = alias2name.get(h)
@@ -137,6 +207,12 @@ def main():
 
     # ---- 2. CQC 道地药材目录 ----
     cqc = json.load(io.open(os.path.join(SRC, "daodi_match.json"), encoding="utf-8"))
+    # 人工映射：题库药名 ← 道地产品名（杭白菊→菊花、北芪→黄芪…）
+    for h, alts in MANUAL_PAIRS.items():
+        for alt in alts:
+            if alt in cqc and h not in cqc:
+                cqc[h] = cqc[alt]
+                break
     for h, v in cqc.items():
         r = fields.setdefault(h, {})
         if not r.get("alias"):
@@ -144,7 +220,9 @@ def main():
             if ca:
                 r["alias"], r["srcAlias"] = ca, SRC_CQC
         if not r.get("area") and v["area"]:
-            r["area"], r["srcArea"] = trim_area(v["area"]), SRC_CQC
+            ca = clean_area(v["area"])
+            if ca:
+                r["area"], r["srcArea"] = ca, SRC_CQC
         if not r.get("part") and v["part"]:
             p = pick_part(v["part"])
             if p:
@@ -174,6 +252,9 @@ def main():
         for k in ("alias", "area", "part"):
             if r.get(k):
                 r[k] = sanitize(r[k])
+        # 药用部位里别再带「干燥/新鲜」这类加工字眼，只留部位本身
+        if r.get("part"):
+            r["part"] = re.sub(r"^(?:干燥|新鲜|鲜)", "", r["part"]).strip()
 
     json.dump(fields, io.open(OUT, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
 

@@ -37,13 +37,28 @@ else ok('药用部位覆盖 ' + pct(nQ));
 console.log('  产地分布覆盖 %s（其余留空，不编数据）', pct(nG));
 
 /* 抽查几条，确认内容像话 */
-const probe = { '大黄': '川军', '三七': '田七', '人参': '生晒参', '菊花': '杭菊', '麻黄': '草麻黄' };
+const probe = { '大黄': '川军', '三七': '田七', '人参': '生晒参', '菊花': '杭菊', '麻黄': '龙沙' };
 let pbad = 0;
 for (const [n, kw] of Object.entries(probe)) {
   const h = herbs.find(x => x.n === n);
   if (!h || !h.a || !h.a.includes(kw)) { pbad++; mark(`${n} 的别名里应含「${kw}」，实际：${h ? h.a : '(无)'}`); }
 }
 if (!pbad) ok('别名抽查通过（' + Object.keys(probe).join('、') + '）');
+
+/* 精简规则：别名里不能出现药名本身（草麻黄/川升麻 那种是原植物变体名，不是别名） */
+const badAlias = herbs.filter(h => h.a && h.a.split('、').some(a => a.includes(h.n)));
+if (badAlias.length) {
+  badAlias.slice(0, 4).forEach(h => mark(`${h.n} 的别名里还含药名本身：${h.a}`));
+} else ok('别名已精简：没有「包含药名」的变体名');
+const overLong = herbs.filter(h => h.a && h.a.split('、').length > 4);
+if (overLong.length) mark('别名超过 4 条的还有 ' + overLong.length + ' 味');
+else ok('每味别名最多 4 条');
+
+/* 产地字段不能是生境描述 */
+const habitat = herbs.filter(h => h.g && /^(海拔|生|长于|喜)/.test(h.g));
+if (habitat.length) {
+  habitat.slice(0, 3).forEach(h => mark(`${h.n} 的产地是生境描述而不是地名：${h.g}`));
+} else ok('产地字段都是地名，没有「海拔…山坡」这类生境描述');
 
 /* ---------------- 界面接入 ---------------- */
 console.log('\n【界面】');

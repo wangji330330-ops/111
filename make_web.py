@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """生成网页版数据：docs/data/*.json + 图片目录 + 版本信息。
 
 输出：
@@ -24,7 +24,7 @@ DATA = os.path.join(WEB, "data")
 IMGSRC = os.path.join(HERE, "images")
 IMGDST = os.path.join(WEB, "images")
 
-VERSION = "1.7.0"
+VERSION = "1.7.1"
 
 NOTES = ("1.7.0：每味药新增【别名】【产地分布】【药用部位】三项，搜索支持别名（搜「田七」能找到三七）；"
          "数据取自《天津市中药饮片炮制规范》2022、《道地药材产品认证目录》、《中国药典》2020，逐项标注出处")
